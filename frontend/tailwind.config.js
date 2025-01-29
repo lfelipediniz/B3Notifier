@@ -60,6 +60,13 @@ export default {
 		animation: {
 		  "caret-blink": "caret-blink 1.25s ease-out infinite"
 		}
+	  }, 
+	  screens: {
+		'sm': '640px',
+		'md': '970px',
+		'lg': '1024px',
+		'xl': '1280px',
+		'2xl': '1536px',
 	  }
 	},
 	plugins: [require("tailwindcss-animate")]
