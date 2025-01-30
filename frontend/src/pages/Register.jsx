@@ -1,10 +1,10 @@
 import React, { useState } from "react";
-import axios from "axios";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
 import { ScanSearch } from "lucide-react";
+import { sendOTP, verifyOTP, registerUser } from "@/api";
 
 import {
   InputOTP,
@@ -19,14 +19,12 @@ import {
   ToastViewport,
 } from "@/components/ui/toast";
 
-const API_BASE_URL = "http://127.0.0.1:8000/api/user"; // apenas pra testar localmente, dps trabalhamos pra producao
-
 const Register = () => {
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [otp, setOtp] = useState("");
   const [toast, setToast] = useState(null);
-  const [userExists, setUserExists] = useState(false); 
+  const [userExists, setUserExists] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
     username: "",
@@ -40,18 +38,16 @@ const Register = () => {
     setTimeout(() => setToast(null), 3000);
   };
 
-  // envia o codigo para o emial do usuario
-  const sendOTP = async () => {
+  // envia o codigo para o email do usuario
+  const sendUserOTP = async () => {
     try {
-      const response = await axios.post(`${API_BASE_URL}/send-otp/`, {
-        email: formData.email,
-      });
+      const response = await sendOTP({ email: formData.email });
 
-      setUserExists(response.data.user_exists); // caso o usuario exista, atualiza dar update no usuario no bd ao inves de criar um novo
+      setUserExists(response.user_exists); // Corrigido: acessa a resposta corretamente
 
       showToast(
         "Sucesso",
-        response.data.user_exists
+        response.user_exists
           ? "Código de atualização enviado para seu email!"
           : "Código de verificação enviado para seu email!",
         "success"
@@ -59,37 +55,33 @@ const Register = () => {
 
       setStep(2);
     } catch (error) {
-      showToast(
-        "Erro",
-        error.response?.data?.error || "Falha ao enviar OTP.",
-        "error"
-      );
+      showToast("Erro", error.error || "Falha ao enviar OTP.", "error");
     }
   };
 
-  // verifica se o codigo de OTP inserido esta correto 
-  const verifyOTP = async () => {
+  // verifica se o codigo de OTP inserido esta correto
+  const verifyUserOTP = async () => {
     try {
-      const response = await axios.post(`${API_BASE_URL}/verify-otp/`, {
-        email: formData.email,
-        otp,
-      });
+      const response = await verifyOTP({ email: formData.email, otp: otp });
+
       showToast("Sucesso", "Código verificado!", "success");
-      if (response.status === 200) {
+
+      // Apenas avança de etapa se a resposta da API estiver correta
+      if (response && response.message === "Código verificado com sucesso!") {
         setStep(3);
       } else {
-        showToast("Erro", "Nao possivel avançar para o próximo passo", "error");
+        showToast(
+          "Erro",
+          "Não foi possível avançar para o próximo passo",
+          "error"
+        );
       }
     } catch (error) {
-      showToast(
-        "Erro",
-        error.response?.data?.error || "Código inválido ou expirado.",
-        "error"
-      );
+      showToast("Erro", error.error || "Código inválido ou expirado.", "error");
     }
   };
 
-// etapa final depois das verificações, cria a conta do usuario
+  // etapa final depois das verificações, cria a conta do usuario
   const createAccount = async () => {
     if (formData.password !== formData.confirmPassword) {
       showToast("Erro", "As senhas não coincidem!", "error");
@@ -97,13 +89,12 @@ const Register = () => {
     }
 
     try {
-      await axios.post(`${API_BASE_URL}/register/`, {
+      await registerUser({
         username: formData.username,
         email: formData.email,
         password: formData.password,
-        confirm_password: formData.confirmPassword,
+        confirmPassword: formData.confirmPassword,
       });
-
       showToast("Sucesso", "Conta criada com sucesso!", "success");
       navigate("/login");
     } catch (error) {
@@ -119,7 +110,7 @@ const Register = () => {
     }
   };
 
- // repassando o mesmo card pra nao duplicar codigo
+  // repassando o mesmo card pra nao duplicar codigo
   const renderCardSteps = () => (
     <Card className="w-full max-w-md p-8 shadow-lg">
       <CardContent className="space-y-4">
@@ -131,7 +122,7 @@ const Register = () => {
         {step === 1 && (
           <>
             <p className="text-center text-[hsl(var(--lightgrey))]">
-            Adicione o seu email que irá receber as notificações do mercado
+              Adicione o seu email que irá receber as notificações do mercado
             </p>
             <Input
               type="email"
@@ -145,7 +136,7 @@ const Register = () => {
 
             <Button
               className="w-full bg-[hsl(var(--grey))] text-white"
-              onClick={sendOTP}
+              onClick={sendUserOTP}
             >
               Enviar
             </Button>
@@ -171,7 +162,7 @@ const Register = () => {
                 }}
               >
                 <InputOTPGroup>
-                  {[...Array(6)].map((_, i) => (                    
+                  {[...Array(6)].map((_, i) => (
                     // mapeando o array para nao ter que inserir individualmente
                     // https://ui.shadcn.com/docs/components/input-otp
                     <InputOTPSlot key={i} index={i} />
@@ -181,11 +172,11 @@ const Register = () => {
             </div>
             <Button
               className="w-full bg-[hsl(var(--grey))] text-white"
-              onClick={verifyOTP}
+              onClick={verifyUserOTP}
             >
               Verificar
             </Button>
-             {/* botao unico de voltar para o passo anterior, caso o email inserido foi incorreto */}
+            {/* botao unico de voltar para o passo anterior, caso o email inserido foi incorreto */}
             <Button
               variant="outline"
               className="w-full mt-2"
@@ -238,7 +229,7 @@ const Register = () => {
 
             <Button
               className="w-full bg-[hsl(var(--grey))] text-white"
-              onClick={createAccount} 
+              onClick={createAccount}
             >
               {userExists ? "Atualizar" : "Criar"}
             </Button>

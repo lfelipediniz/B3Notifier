@@ -6,6 +6,7 @@ import Stocks from "./pages/Stocks";
 import Header from "./components/Header";
 import Login from "./pages/Login";
 
+
 function App() {
   return (
     <AuthProvider>

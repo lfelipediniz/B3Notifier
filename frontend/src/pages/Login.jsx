@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
 import { ScanSearch } from "lucide-react";
+import { loginUser } from "@/api";
 
 import {
   ToastProvider,
@@ -13,8 +14,6 @@ import {
   ToastDescription,
   ToastViewport,
 } from "@/components/ui/toast";
-
-const API_BASE_URL = "http://127.0.0.1:8000/api/user"; // apenas pra testar localmente, dps trabalhamos pra producao
 
 const Login = () => {
   const navigate = useNavigate();
@@ -36,28 +35,28 @@ const Login = () => {
       showToast("Erro", "Preencha todos os campos!", "error");
       return;
     }
-
+  
     try {
-      const response = await axios.post(`${API_BASE_URL}/login/`, {
+      const response = await loginUser({
         username: formData.username,
         password: formData.password,
       });
-
-      // armazena os tokens no localStorage
-      localStorage.setItem("access_token", response.data.access);
-      localStorage.setItem("refresh_token", response.data.refresh);
-
-      axios.defaults.headers.common["Authorization"] = `Bearer ${response.data.access}`;
-
+  
+      // armazena os tokens 
+      localStorage.setItem("access_token", response.access);
+      localStorage.setItem("refresh_token", response.refresh);
+  
+      // add o token JWT no header de futuras reqs
+      axios.defaults.headers.common["Authorization"] = `Bearer ${response.access}`;
+  
       showToast("Sucesso", "Login realizado com sucesso!", "success");
-
-      // redireicona para pagina principal
+  
       navigate("/stocks");
     } catch (error) {
-      showToast("Erro", "Usuário ou senha incorretos!", "error");
+      showToast("Erro", error.message || "Usuário ou senha incorretos!", "error");
     }
   };
-
+  
   // repassando o mesmo card pra nao duplicar codigo
   const renderCardSteps = () => (
     <Card className="w-full max-w-md p-8 shadow-lg">
@@ -89,7 +88,7 @@ const Login = () => {
           />
           <Button
             className="w-full bg-[hsl(var(--grey))] text-white"
-            onClick={handleLogin} 
+            onClick={handleLogin}
           >
             Entrar
           </Button>
