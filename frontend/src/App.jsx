@@ -4,6 +4,7 @@ import { AuthProvider, useAuth } from "./context/AuthContext";
 import Register from "./pages/Register";
 import Stocks from "./pages/Stocks";
 import Header from "./components/Header";
+import Login from "./pages/Login";
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function AuthWrapper() {
       <Routes>
         <Route path="/" element={<RequireAuth />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/login" element={<Login />} />
         <Route path="/stocks" element={<Stocks />} />
       </Routes>
     </>
