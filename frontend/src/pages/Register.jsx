@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import axios from "axios";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -18,11 +19,14 @@ import {
   ToastViewport,
 } from "@/components/ui/toast";
 
+const API_BASE_URL = "http://127.0.0.1:8000/api/user"; // apenas pra testar localmente, dps trabalhamos pra producao
+
 const Register = () => {
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [otp, setOtp] = useState("");
   const [toast, setToast] = useState(null);
+  const [userExists, setUserExists] = useState(false); 
   const [formData, setFormData] = useState({
     email: "",
     username: "",
@@ -36,60 +40,98 @@ const Register = () => {
     setTimeout(() => setToast(null), 3000);
   };
 
-  const handleNextStep = () => {
-    if (step === 1) {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(formData.email)) {
-        showToast("Erro", "Insira um email válido!", "error");
-        return;
-      }
-    }
-    if (step < 3) setStep(step + 1);
-  };
+  // envia o codigo para o emial do usuario
+  const sendOTP = async () => {
+    try {
+      const response = await axios.post(`${API_BASE_URL}/send-otp/`, {
+        email: formData.email,
+      });
 
-  const handlePrevStep = () => {
-    if (step > 1) setStep(step - 1);
-  };
+      setUserExists(response.data.user_exists); // caso o usuario exista, atualiza dar update no usuario no bd ao inves de criar um novo
 
-  const handleVerifyOTP = () => {
-    if (otp.length !== 6) {
-      showToast("Erro", "Código inválido!", "error");
-      return;
-    }
-    handleNextStep();
-  };
+      showToast(
+        "Sucesso",
+        response.data.user_exists
+          ? "Código de atualização enviado para seu email!"
+          : "Código de verificação enviado para seu email!",
+        "success"
+      );
 
-  const handleCreateAccount = () => {
-    if (formData.username.length > 20) {
+      setStep(2);
+    } catch (error) {
       showToast(
         "Erro",
-        "Nome de usuário deve ter no máximo 20 caracteres!",
+        error.response?.data?.error || "Falha ao enviar OTP.",
         "error"
       );
-      return;
     }
-    if (formData.password.length > 20) {
-      showToast("Erro", "A senha deve ter no máximo 20 caracteres.", "error");
-      return;
+  };
+
+  // verifica se o codigo de OTP inserido esta correto 
+  const verifyOTP = async () => {
+    try {
+      const response = await axios.post(`${API_BASE_URL}/verify-otp/`, {
+        email: formData.email,
+        otp,
+      });
+      showToast("Sucesso", "Código verificado!", "success");
+      if (response.status === 200) {
+        setStep(3);
+      } else {
+        showToast("Erro", "Nao possivel avançar para o próximo passo", "error");
+      }
+    } catch (error) {
+      showToast(
+        "Erro",
+        error.response?.data?.error || "Código inválido ou expirado.",
+        "error"
+      );
     }
+  };
+
+// etapa final depois das verificações, cria a conta do usuario
+  const createAccount = async () => {
     if (formData.password !== formData.confirmPassword) {
       showToast("Erro", "As senhas não coincidem!", "error");
       return;
     }
-    showToast("Sucesso", "Conta criada com sucesso!", "success");
+
+    try {
+      await axios.post(`${API_BASE_URL}/register/`, {
+        username: formData.username,
+        email: formData.email,
+        password: formData.password,
+        confirm_password: formData.confirmPassword,
+      });
+
+      showToast("Sucesso", "Conta criada com sucesso!", "success");
+      navigate("/login");
+    } catch (error) {
+      const errorData = error.response?.data || {};
+
+      if (errorData.username) {
+        showToast("Erro", `Username já está em uso!`, "error");
+      } else if (errorData.email) {
+        showToast("Erro", `Email já está em uso!`, "error");
+      } else {
+        showToast("Erro", "Erro ao criar conta.", "error");
+      }
+    }
   };
 
-  // repassando o mesmo card pra nao duplicar codigo
+ // repassando o mesmo card pra nao duplicar codigo
   const renderCardSteps = () => (
     <Card className="w-full max-w-md p-8 shadow-lg">
       <CardContent className="space-y-4">
-        <h2 className="text-2xl font-bold text-center">Crie uma conta</h2>
+        <h2 className="text-2xl font-bold text-center">
+          {userExists ? "Atualize sua conta" : "Crie uma conta"}
+        </h2>
 
         {/* step 1 - enviar o email pra verificacao */}
         {step === 1 && (
           <>
             <p className="text-center text-[hsl(var(--lightgrey))]">
-              Adicione o seu email que irá receber as notificações do mercado
+            Adicione o seu email que irá receber as notificações do mercado
             </p>
             <Input
               type="email"
@@ -103,7 +145,7 @@ const Register = () => {
 
             <Button
               className="w-full bg-[hsl(var(--grey))] text-white"
-              onClick={handleNextStep}
+              onClick={sendOTP}
             >
               Enviar
             </Button>
@@ -114,7 +156,7 @@ const Register = () => {
         {step === 2 && (
           <>
             <p className="text-center text-[hsl(var(--foreground))]">
-              Enviamos um código de verificação para o seu email
+              Digite o código enviado para seu email
             </p>
             <div className="flex justify-center">
               <InputOTP
@@ -129,7 +171,7 @@ const Register = () => {
                 }}
               >
                 <InputOTPGroup>
-                  {[...Array(6)].map((_, i) => (
+                  {[...Array(6)].map((_, i) => (                    
                     // mapeando o array para nao ter que inserir individualmente
                     // https://ui.shadcn.com/docs/components/input-otp
                     <InputOTPSlot key={i} index={i} />
@@ -139,16 +181,15 @@ const Register = () => {
             </div>
             <Button
               className="w-full bg-[hsl(var(--grey))] text-white"
-              onClick={handleVerifyOTP}
+              onClick={verifyOTP}
             >
               Verificar
             </Button>
-
-            {/* botao unico de voltar para o passo anterior, caso o email inserido foi incorreto */}
+             {/* botao unico de voltar para o passo anterior, caso o email inserido foi incorreto */}
             <Button
               variant="outline"
               className="w-full mt-2"
-              onClick={handlePrevStep}
+              onClick={() => setStep(1)}
             >
               Voltar
             </Button>
@@ -159,7 +200,7 @@ const Register = () => {
         {step === 3 && (
           <>
             <p className="text-center text-[hsl(var(--foreground))]">
-              Email verificado! Insira os dados da conta
+              Preencha seus dados para concluir o cadastro
             </p>
             <Input
               type="text"
@@ -181,7 +222,6 @@ const Register = () => {
                 setFormData({ ...formData, password: e.target.value })
               }
             />
-
             <Input
               type="password"
               placeholder="Repita a senha"
@@ -198,9 +238,9 @@ const Register = () => {
 
             <Button
               className="w-full bg-[hsl(var(--grey))] text-white"
-              onClick={handleCreateAccount}
+              onClick={createAccount} 
             >
-              Criar
+              {userExists ? "Atualizar" : "Criar"}
             </Button>
           </>
         )}
