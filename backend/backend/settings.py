@@ -37,13 +37,18 @@ REST_FRAMEWORK = {
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.AllowAny',  # mudando para permitir qualquer um acessar (talvez mudar depois)
+        "rest_framework.permissions.IsAuthenticated", # importante para proteger as rotas
     ],
 }
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    "ROTATE_REFRESH_TOKENS": True,  
+    "BLACKLIST_AFTER_ROTATION": True,  
+    "ALGORITHM": "HS256", # alg de criptografia
+    "SIGNING_KEY": os.getenv("SECRET_KEY"),  # usa a chave do .env pra assinar o token
+    "AUTH_HEADER_TYPES": ("Bearer",),  
 }
 
 
@@ -145,5 +150,6 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# para o frontend conseguir acessar a API
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True

@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User
 from rest_framework.generics import ListAPIView
 from .serializers import UserSerializer, EmailSerializer, OTPVerificationSerializer
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 import resend
 from django.core.cache import cache
 from rest_framework.response import Response
@@ -10,6 +10,8 @@ from rest_framework import status
 from dotenv import load_dotenv
 import random
 import os
+from rest_framework_simplejwt.tokens import RefreshToken
+from django.contrib.auth import authenticate
 
 load_dotenv()
 # configurando o resend para usar a API 
@@ -61,6 +63,7 @@ class SendOTPView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class VerifyOTPView(APIView):
+    permission_classes = [AllowAny] 
     def post(self, request):
         serializer = OTPVerificationSerializer(data=request.data)
         if serializer.is_valid():
@@ -93,3 +96,22 @@ class UserCreate(APIView):
                 return Response({"message": "Conta criada com sucesso!"}, status=status.HTTP_201_CREATED)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class LoginView(APIView):
+    permission_classes = [AllowAny] 
+
+    def post(self, request):
+        username = request.data.get("username")
+        password = request.data.get("password")
+
+        user = authenticate(username=username, password=password)
+        if user is not None:
+            # gerando o token de acesso JWT
+            refresh = RefreshToken.for_user(user)
+            return Response({
+                "refresh": str(refresh),
+                "access": str(refresh.access_token),
+                "message": "Login realizado com sucesso!"
+            }, status=status.HTTP_200_OK)
+        
+        return Response({"error": "Credenciais inválidas!"}, status=status.HTTP_401_UNAUTHORIZED)
