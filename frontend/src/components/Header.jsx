@@ -47,7 +47,7 @@ const Header = () => {
 
       {/* avatar aparece apenas na versao desktop */}
       {isAuthenticated && (
-        <div className="hidden md:flex items-center gap-4">
+        <div className="items-center hidden gap-4 md:flex">
           <span className="text-sm font-medium text-[hsl(var(--grey))]">
             {user?.name || "lfelipediniz"}
           </span>
