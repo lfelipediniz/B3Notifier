@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
 import { ScanSearch } from "lucide-react";
 import { loginUser } from "@/api";
+import { useAuth } from "@/context/AuthContext";
 
 import {
   ToastProvider,
@@ -30,33 +31,43 @@ const Login = () => {
   };
 
   // autentica o usuário e obter o token JWT
+  const { login } = useAuth(); 
+
   const handleLogin = async () => {
     if (!formData.username || !formData.password) {
       showToast("Erro", "Preencha todos os campos!", "error");
       return;
     }
-  
+
     try {
       const response = await loginUser({
         username: formData.username,
         password: formData.password,
       });
-  
-      // armazena os tokens 
+
+      // armazena os tokens
       localStorage.setItem("access_token", response.access);
       localStorage.setItem("refresh_token", response.refresh);
-  
       // add o token JWT no header de futuras reqs
-      axios.defaults.headers.common["Authorization"] = `Bearer ${response.access}`;
-  
+      axios.defaults.headers.common[
+        "Authorization"
+      ] = `Bearer ${response.access}`;
+
+      // update no estado global de autenticação
+      login();
+
       showToast("Sucesso", "Login realizado com sucesso!", "success");
-  
+
       navigate("/stocks");
     } catch (error) {
-      showToast("Erro", error.message || "Usuário ou senha incorretos!", "error");
+      showToast(
+        "Erro",
+        error.message || "Usuário ou senha incorretos!",
+        "error"
+      );
     }
   };
-  
+
   // repassando o mesmo card pra nao duplicar codigo
   const renderCardSteps = () => (
     <Card className="w-full max-w-md p-8 shadow-lg">
