@@ -20,3 +20,4 @@ class RegistrationSerializer(serializers.Serializer):
                 {"password": "As senhas não coincidem."}
             )
         return data
+

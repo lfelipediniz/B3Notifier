@@ -49,22 +49,21 @@ const Header = () => {
       {isAuthenticated && (
         <div className="items-center hidden gap-4 md:flex">
           <span className="text-sm font-medium text-[hsl(var(--grey))]">
-            {user?.name || "lfelipediniz"}
+            {user?.username || "Usuário"}
           </span>
           <Link to="/" className="cursor-pointer" onClick={logout}>
             <Avatar className="cursor-pointer">
               <AvatarImage
                 src={user?.avatar || "https://via.placeholder.com/40"}
-                alt={user?.name}
+                alt={user?.username}
               />
               <AvatarFallback className="bg-[hsl(var(--midwhite))] text-[hsl(var(--grey))]">
-                {user?.name?.[0] || "L"}
+                {user?.username?.[0] || "U"}
               </AvatarFallback>
             </Avatar>
           </Link>
         </div>
       )}
-
       {/* botao de sair exibido no lugar do avatar no mobile */}
       {isAuthenticated && (
         <button

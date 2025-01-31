@@ -92,4 +92,9 @@ export const logout = () => {
   delete api.defaults.headers.common["Authorization"];
 };
 
+// captura os dados do usuário logado
+export const getUserProfile = async () => {
+  return handleRequest(() => api.get("/user/profile/"));
+};
+
 export default api;

@@ -64,6 +64,7 @@ INSTALLED_APPS = [
     "api",
     "rest_framework",
     "corsheaders",
+    "django_extensions",
 ]
 
 MIDDLEWARE = [
@@ -153,3 +154,4 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # para o frontend conseguir acessar a API
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
+

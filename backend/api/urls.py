@@ -1,6 +1,7 @@
 from django.urls import path
 from django.urls import include
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from .views.user_views import UserProfileView, UserCreate, UserListView 
 from .views.otp_views import SendOTPView, VerifyOTPView
 from .views.user_views import UserCreate, UserListView
 
@@ -10,6 +11,9 @@ urlpatterns = [
     # verifica se o código OTP é válido
     path('user/verify-otp/', VerifyOTPView.as_view(), name='verify_otp'),
     path('user/register/', UserCreate.as_view(), name='register'),
+    
+    # usuarios autenticados
+    path("user/profile/", UserProfileView.as_view(), name="user_profile"),
     
     # endpoints de autenticação JWT
     path('token/', TokenObtainPairView.as_view(), name='get_token'),

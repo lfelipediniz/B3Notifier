@@ -59,6 +59,8 @@ const Login = () => {
       showToast("Sucesso", "Login realizado com sucesso!", "success");
 
       navigate("/stocks");
+      window.location.reload(); // recarrega a pagina pra garantir que o estado atualize
+      
     } catch (error) {
       showToast(
         "Erro",
