@@ -43,7 +43,7 @@ const Register = () => {
     try {
       const response = await sendOTP({ email: formData.email });
 
-      setUserExists(response.user_exists); // Corrigido: acessa a resposta corretamente
+      setUserExists(response.user_exists); 
 
       showToast(
         "Sucesso",
