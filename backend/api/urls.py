@@ -1,9 +1,8 @@
 from django.urls import path
-from django.urls import include
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
-from .views.user_views import UserProfileView, UserCreate, UserListView 
+from .views.user_views import UserProfileView, UserCreate, UserListView
 from .views.otp_views import SendOTPView, VerifyOTPView
-from .views.user_views import UserCreate, UserListView
+from .views.stock_views import StockCreateView, StockUpdateView, StockListView
 
 urlpatterns = [
     # envia o codigo OTP por email
@@ -19,6 +18,11 @@ urlpatterns = [
     path('token/', TokenObtainPairView.as_view(), name='get_token'),
     path('token/refresh/', TokenRefreshView.as_view(), name='refresh_token'),
 
+    # endpoints pros ativos
+    path('stock/create/', StockCreateView.as_view(), name='stock_create'),
+    path('stock/update/<int:pk>/', StockUpdateView.as_view(), name='stock_update'),
+    path('stock/list/', StockListView.as_view(), name='stock_list'),
+    
     # usando para testes, apagar dps
     path('user/list/', UserListView.as_view(), name='list_users'),
 ]

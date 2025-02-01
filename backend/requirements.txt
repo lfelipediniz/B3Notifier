@@ -9,3 +9,8 @@ sqlparse
 psycopg2-binary
 python-dotenv
 resend
+yfinance
+statistics
+celery
+redis
+django-celery-beat
