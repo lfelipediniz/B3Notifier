@@ -50,13 +50,22 @@ class StockUpdateView(APIView):
         except Stock.DoesNotExist:
             return Response({"error": "Ativo não encontrado."}, status=status.HTTP_404_NOT_FOUND)
         
+        # da upadte ma periodicidade antes de calcular os novos valores
+        new_periodicity = request.data.get("periodicity")
+        if new_periodicity is not None:
+            try:
+                stock.periodicity = int(new_periodicity)
+            except ValueError:
+                return Response({"error": "A periodicidade tem que ser um número inteiro válido."}, status=status.HTTP_400_BAD_REQUEST)
+        
         yahoo_data = get_yahoo_data(stock.name)
         if not yahoo_data:
             return Response({"error": "Não foi possível obter dados do ativo."}, status=status.HTTP_400_BAD_REQUEST)
         
         limits = calculate_limits(float(stock.current_price), yahoo_data)
         if limits is None:
-            # a variacao foi insignificante, nao atualiza
+            # mesmo a variaçao seja insuficiente, salvamos a nova periodicidade
+            stock.save()
             serializer = StockSerializer(stock)
             return Response({"message": "Variação insuficiente para atualização.", "data": serializer.data}, status=status.HTTP_200_OK)
         
