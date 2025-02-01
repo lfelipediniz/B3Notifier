@@ -17,6 +17,10 @@ class StockCreateView(APIView):
         if not asset_name:
             return Response({"error": "O campo 'name' é obrigatório."}, status=status.HTTP_400_BAD_REQUEST)
         
+        # se o usuario ja monitora o ativo, retorna erro
+        if Stock.objects.filter(user=request.user, name=asset_name).exists():
+            return Response({"error": "Este ativo já está sendo monitorado."}, status=status.HTTP_400_BAD_REQUEST)
+        
         yahoo_data = get_yahoo_data(asset_name)
         if not yahoo_data:
             return Response({"error": "Não foi possível obter dados do ativo."}, status=status.HTTP_400_BAD_REQUEST)
