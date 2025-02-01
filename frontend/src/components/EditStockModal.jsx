@@ -63,7 +63,6 @@ const EditStockModal = ({ isOpen, onClose }) => {
           <Select value={selectedTime} onValueChange={setSelectedTime}>
             <SelectTrigger className="flex items-center w-full gap-2 px-4 py-2">
               <Clock className="w-4 h-4 text-gray-500" />{" "}
-              {/* Ícone à esquerda */}
               <SelectValue placeholder="Selecione o tempo..." />
             </SelectTrigger>
             <SelectContent className="w-48">
