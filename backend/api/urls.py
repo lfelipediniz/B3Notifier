@@ -2,7 +2,7 @@ from django.urls import path
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from .views.user_views import UserProfileView, UserCreate, UserListView
 from .views.otp_views import SendOTPView, VerifyOTPView
-from .views.stock_views import StockCreateView, StockUpdateView, StockListView
+from .views.stock_views import StockCreateView, StockUpdateView, StockListView, StockDeleteView
 
 urlpatterns = [
     # envia o codigo OTP por email
@@ -22,6 +22,7 @@ urlpatterns = [
     path('stock/create/', StockCreateView.as_view(), name='stock_create'),
     path('stock/update/<int:pk>/', StockUpdateView.as_view(), name='stock_update'),
     path('stock/list/', StockListView.as_view(), name='stock_list'),
+    path('stock/delete/<int:pk>/', StockDeleteView.as_view(), name='stock_delete'),
     
     # usando para testes, apagar dps
     path('user/list/', UserListView.as_view(), name='list_users'),

@@ -83,3 +83,15 @@ class StockListView(ListAPIView):
 
     def get_queryset(self):
         return Stock.objects.filter(user=self.request.user)
+
+class StockDeleteView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request, pk):
+        try:
+            stock = Stock.objects.get(pk=pk, user=request.user)
+        except Stock.DoesNotExist:
+            return Response({"error": "Ativo não encontrado!"}, status=status.HTTP_404_NOT_FOUND)
+        
+        stock.delete()
+        return Response({"message": "Ativo removido com sucesso!"}, status=status.HTTP_200_OK)
