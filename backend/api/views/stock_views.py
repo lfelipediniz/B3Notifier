@@ -95,3 +95,16 @@ class StockDeleteView(APIView):
         
         stock.delete()
         return Response({"message": "Ativo removido com sucesso!"}, status=status.HTTP_200_OK)
+
+class StockProfileView(APIView):
+    # busca um ativo pelo nome e retorna suas informações
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, name):
+        try:
+            stock = Stock.objects.get(user=request.user, name=name)
+        except Stock.DoesNotExist:
+            return Response({"error": "Ativo não encontrado."}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = StockSerializer(stock)
+        return Response(serializer.data, status=status.HTTP_200_OK)
