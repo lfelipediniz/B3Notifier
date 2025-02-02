@@ -30,7 +30,7 @@ const StockCard = ({ ticker, price, buy, sell, periodicity, isEditMode, onEdit }
       </div>
 
       <div className="mt-2">
-        <span className="text-2xl font-extrabold text-[hsl(var(--foreground))]">{ticker}</span>
+        <span className="text-2xl font-extrabold text-[hsl(var(--foreground))] uppercase">{ticker}</span>
       </div>
 
       <div className="flex items-center justify-between mt-4">

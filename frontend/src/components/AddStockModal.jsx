@@ -150,7 +150,7 @@ const AddStockModal = ({ isOpen, onClose, onStockAdded }) => {
             />
           </div>
 
-          <Button onClick={handleSearch} className="ml-2">
+          <Button onClick={handleSearch} className="ml-2 bg-[hsl(var(--lightgrey))]">
             Pesquisar
           </Button>
         </div>
@@ -200,16 +200,6 @@ const AddStockModal = ({ isOpen, onClose, onStockAdded }) => {
           </div>
         ) : (
           <div className="mt-4 border-t pt-4 border-[hsl(var(--border))] flex justify-between items-center">
-            <div className="flex items-center gap-1">
-              <Settings className="w-4 h-4 text-[hsl(var(--foreground))]" />
-              <Button
-                variant="link"
-                onClick={stockAlreadyMonitored ? handleEditStock : undefined}
-                className="text-[hsl(var(--foreground))] ml-[-12px]"
-              >
-                {stockAlreadyMonitored ? "Editar" : "Adicionar e Editar"}
-              </Button>
-            </div>
             <Button
               onClick={handleAddStock}
               disabled={loading || stockAlreadyMonitored}
