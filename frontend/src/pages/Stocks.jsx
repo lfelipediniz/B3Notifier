@@ -20,6 +20,7 @@ const Stocks = () => {
   const [selectedStock, setSelectedStock] = useState(null);
   const [stocks, setStocks] = useState([]); 
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState(""); 
 
   const handleFilterChange = (filter) => {
     setFilters((prev) => ({ ...prev, [filter]: !prev[filter] }));
@@ -34,7 +35,7 @@ const Stocks = () => {
     setIsEditStockModalOpen(true);
   };
 
-  // busca os ativos monitorados do usuário 
+  // busca os ativos monitorados do usuario 
   useEffect(() => {
     const fetchStocks = async () => {
       try {
@@ -49,6 +50,11 @@ const Stocks = () => {
 
     fetchStocks();
   }, []);
+
+  // filtra os stocks pelo nome
+  const filteredStocks = stocks.filter((stock) =>
+    stock.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <div className="w-full p-6">
@@ -95,7 +101,12 @@ const Stocks = () => {
                 className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
                 size={20}
               />
-              <Input placeholder="Pesquisar Ativos..." className="pl-10" />
+              <Input 
+                placeholder="Pesquisar Ativos..." 
+                className="pl-10"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
             </div>
           </div>
         </div>
@@ -125,8 +136,8 @@ const Stocks = () => {
         <p>Carregando ativos...</p>
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-          {stocks.length > 0 ? (
-            stocks.map((stock) => (
+          {filteredStocks.length > 0 ? (
+            filteredStocks.map((stock) => (
               <StockCard
                 key={stock.id}
                 ticker={stock.name}
