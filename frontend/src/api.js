@@ -122,5 +122,10 @@ export const deleteStock = async (id) => {
   return handleRequest(() => api.delete(`/stock/delete/${id}/`));
 };
 
+// captura info sobre a ultima e a proxima atualizcao dos ativos
+export const getStockUpdatesInfo = async () => {
+  return handleRequest(() => api.get("/stocks/updates-info/"));
+};
+
 
 export default api;

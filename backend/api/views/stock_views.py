@@ -6,6 +6,8 @@ from rest_framework.generics import ListAPIView
 from api.models import Stock
 from api.serializers.stock_serializers import StockSerializer
 from utils.finance import get_yahoo_data, calculate_limits
+from datetime import timedelta
+from django.utils import timezone
 
 class StockCreateView(APIView):
     # cria um novo ativo na conta do usuario com base nos dados fornecidos e funcoes do utils.finance
@@ -144,4 +146,49 @@ class StockQuoteView(APIView):
             "buy_limit": limits['buy_limit'],
             "sell_limit": limits['sell_limit'],
             "periodicity": periodicity
+        }, status=status.HTTP_200_OK)
+
+class StockUpdatesInfoView(APIView):
+    # retorna a data da última atualização geral e a previsão da próxima atualizaçao
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        now = timezone.now()
+        stocks = Stock.objects.filter(user=request.user)
+
+        if not stocks.exists():
+            return Response({
+                "message": "Nenhum ativo monitorado encontrado."
+            }, status=status.HTTP_404_NOT_FOUND)
+
+        # captura todas as ultimas atualizações dos ativos
+        last_updates = [stock.last_updated for stock in stocks if stock.last_updated]
+
+        if not last_updates:
+            return Response({
+                "message": "Nenhuma atualização registrada ainda."
+            }, status=status.HTTP_404_NOT_FOUND)
+
+        # útima atualizacao geral
+        last_update_overall = max(last_updates)
+
+        # proximo update com base na periodicidade de cada ativo
+        next_updates = []
+        for stock in stocks:
+            if stock.last_updated:
+                next_time = stock.last_updated + timedelta(minutes=stock.periodicity)
+                next_updates.append(next_time)
+
+        #  atualização mais próxima entre os ativos monitorados
+        if next_updates:
+            next_update_overall = min(next_updates)
+            time_until_next_update = (next_update_overall - now).total_seconds()
+        else:
+            next_update_overall = None
+            time_until_next_update = None
+
+        return Response({
+            "last_update": last_update_overall.isoformat(),
+            "next_update": next_update_overall.isoformat() if next_update_overall else None,
+            "time_until_next_update_seconds": time_until_next_update,
         }, status=status.HTTP_200_OK)

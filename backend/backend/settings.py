@@ -158,13 +158,4 @@ CORS_ALLOW_CREDENTIALS = True
 # configs do Celery (utilizando o Redis como broker)
 CELERY_BROKER_URL = 'redis://localhost:6379/0'
 CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
-
-# agendando a task de verificacao de update dos ativos com Celery Beat
-CELERY_BEAT_SCHEDULE = {
-    'check-stocks-every-minute': {
-        'task': 'api.tasks.check_and_update_stocks',
-        'schedule': 60.0,  # executa a cada 60 segundos
-    },
-}
-
 CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True

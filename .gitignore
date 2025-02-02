@@ -45,3 +45,5 @@ dist
 dist-ssr
 *.local
 
+/celerybeat-schedule
+**/celerybeat-schedule

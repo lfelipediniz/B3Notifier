@@ -1,8 +1,10 @@
 from celery import shared_task
 from django.utils import timezone
+from django.contrib.auth import get_user_model
 from api.models import Stock
 from utils.finance import get_yahoo_data, calculate_limits
 
+User = get_user_model() # pega o model de usuario do Django para as taks serem por usuario
 # essas tarefas sao executadas periodicamente pelo Celery, assim a gente garante que os ativos vao estar sempre atualizados
 # importante destacar que ate agora estou usando o Redis como broker
 
@@ -21,22 +23,44 @@ def update_stock(stock_id):
             stock.current_price = limits['PBT']
             stock.lower_limit = limits['buy_limit']
             stock.upper_limit = limits['sell_limit']
+            # atualiza a data da última atualização
+            stock.last_updated = timezone.now()
             stock.save()
             return f"{stock.name} atualizado com sucesso."
         else:
+            stock.last_updated = timezone.now()
             return f"Variação insuficiente para atualizar {stock.name}."
     else:
         return f"Não foi possível obter dados para {stock.name}."
 
+
 @shared_task
-def check_and_update_stocks():
-    # essa task é executada periodicamente (a cada minuto) e verifica quais ativos precisam ser atualizados, de acordo com a sua periodicidade
+def check_and_update_stocks_for_user(user_id):
+    try:
+        user = User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        return f"Usuário {user_id} não existe."
+
     now = timezone.now()
-    stocks = Stock.objects.all()
+    stocks = Stock.objects.filter(user=user)
     for stock in stocks:
-        # calcula o tempo decorrido desde de a ultima atualizacao
-        minutes_since_update = (now - stock.last_updated).total_seconds() / 60.0
-        if minutes_since_update >= stock.periodicity:
-            # dispara a task de atualização individual de forma assíncrona
+        # se  last_updated nao foi setado
+        if not stock.last_updated:
             update_stock.delay(stock.id)
-    return "Verificação concluída."
+        else:
+            minutes_since_update = (now - stock.last_updated).total_seconds() / 60.0
+            if minutes_since_update >= stock.periodicity:
+                # dispara a task de atualização individual de forma assíncrona
+                update_stock.delay(stock.id)
+    return f"Verificação concluída para o usuário {user.username}."
+
+
+@shared_task
+def check_and_update_stocks_global():
+    # essa task é executada periodicamente (a cada minuto) e verifica quais ativos precisam ser atualizados
+
+    # captura os ids de todos os usuários que tem pelo menos um stock
+    user_ids = Stock.objects.values_list('user', flat=True).distinct()
+    for user_id in user_ids:
+        check_and_update_stocks_for_user.delay(user_id)
+    return "Verificação global iniciada."
