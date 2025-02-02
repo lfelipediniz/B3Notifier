@@ -112,5 +112,15 @@ export const fetchStockQuote = async (name, periodicity) => {
   return handleRequest(() => api.get(`/stock/quote/?name=${name}&periodicity=${periodicity}`));
 };
 
+// atualiza os dados de um ativo
+export const updateStock = async (id, data) => {
+  return handleRequest(() => api.put(`/stock/update/${id}/`, data));
+};
+
+// apaga um ativo do monitoramento
+export const deleteStock = async (id) => {
+  return handleRequest(() => api.delete(`/stock/delete/${id}/`));
+};
+
 
 export default api;
