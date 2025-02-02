@@ -97,4 +97,10 @@ export const getUserProfile = async () => {
   return handleRequest(() => api.get("/user/profile/"));
 };
 
+// busca os ativos monitorados do usuario
+export const getStocks = async () => {
+  return handleRequest(() => api.get("/stock/list/"));
+};
+
+
 export default api;

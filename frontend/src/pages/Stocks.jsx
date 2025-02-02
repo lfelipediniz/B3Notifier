@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,24 +7,19 @@ import StockCard from "@/components/StockCard";
 import FilterPopover from "@/components/FilterPopover";
 import AddStockModal from "@/components/AddStockModal";
 import EditStockModal from "@/components/EditStockModal";
-
-const stocks = [
-  { ticker: "ITUB4", price: 29.0, buy: 25.0, sell: 30.0 },
-  { ticker: "MGLU3", price: 29.0, buy: 25.0, sell: 30.0 },
-  { ticker: "ITUB4", price: 29.0, buy: 25.0, sell: 30.0 },
-  { ticker: "ITUB4", price: 29.0, buy: 25.0, sell: 30.0 },
-];
+import { getStocks } from "@/api"; 
 
 const Stocks = () => {
   const [filters, setFilters] = useState({
     nearSell: false,
     nearBuy: false,
   });
-
   const [isAddStockModalOpen, setIsAddStockModalOpen] = useState(false);
   const [isEditStockModalOpen, setIsEditStockModalOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [selectedStock, setSelectedStock] = useState(null);
+  const [stocks, setStocks] = useState([]); 
+  const [loading, setLoading] = useState(true);
 
   const handleFilterChange = (filter) => {
     setFilters((prev) => ({ ...prev, [filter]: !prev[filter] }));
@@ -38,6 +33,22 @@ const Stocks = () => {
     setSelectedStock(stock);
     setIsEditStockModalOpen(true);
   };
+
+  // busca os ativos monitorados do usuário 
+  useEffect(() => {
+    const fetchStocks = async () => {
+      try {
+        const response = await getStocks();
+        setStocks(response);
+      } catch (error) {
+        console.error("Erro ao carregar ativos:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStocks();
+  }, []);
 
   return (
     <div className="w-full p-6">
@@ -60,7 +71,7 @@ const Stocks = () => {
       </div>
 
       <div className="flex items-center justify-between gap-2 md:hidden">
-        <Badge variant="outline" className="flex items-center gap-3">
+        <Badge variant="outline" className="flex items-center gap-1">
           <Clock size={16} /> Última Atualização há 3 min
         </Badge>
         <Button
@@ -110,17 +121,29 @@ const Stocks = () => {
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-        {stocks.map((stock, index) => (
-          <StockCard
-            key={index}
-            {...stock}
-            isEditMode={isEditMode}
-            onEdit={() => handleEditClick(stock)}
-            showEditIcon={isEditMode}
-          />
-        ))}
-      </div>
+      {loading ? (
+        <p>Carregando ativos...</p>
+      ) : (
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+          {stocks.length > 0 ? (
+            stocks.map((stock) => (
+              <StockCard
+                key={stock.id}
+                ticker={stock.name}
+                periodicity={stock.periodicity}
+                price={Number(stock.current_price)}
+                buy={Number(stock.lower_limit)}
+                sell={Number(stock.upper_limit)}
+                isEditMode={isEditMode}
+                onEdit={() => handleEditClick(stock)}
+                showEditIcon={isEditMode}
+              />
+            ))
+          ) : (
+            <p>Nenhum ativo monitorado encontrado</p>
+          )}
+        </div>
+      )}
 
       <AddStockModal
         isOpen={isAddStockModalOpen}

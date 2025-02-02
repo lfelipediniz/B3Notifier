@@ -54,7 +54,7 @@ const Header = () => {
           <Link to="/" className="cursor-pointer" onClick={logout}>
             <Avatar className="cursor-pointer">
               <AvatarImage
-                src={user?.avatar || "https://via.placeholder.com/40"}
+                src={user?.avatar}
                 alt={user?.username}
               />
               <AvatarFallback className="bg-[hsl(var(--midwhite))] text-[hsl(var(--grey))]">

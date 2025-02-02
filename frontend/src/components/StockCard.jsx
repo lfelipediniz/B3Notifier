@@ -2,7 +2,7 @@ import React from "react";
 import { Card } from "@/components/ui/card";
 import { SquareArrowUp, SquareArrowDown, Clock, Pencil } from "lucide-react";
 
-const StockCard = ({ ticker, price, buy, sell, isEditMode, onEdit }) => {
+const StockCard = ({ ticker, price, buy, sell, periodicity, isEditMode, onEdit }) => {
   return (
     <Card 
       className="relative p-6 bg-[hsl(var(--card))] border border-[hsl(var(--border))] shadow-md rounded-2xl cursor-pointer"
@@ -26,7 +26,7 @@ const StockCard = ({ ticker, price, buy, sell, isEditMode, onEdit }) => {
           <Clock className="w-4 h-4" />
           <span className="text-base">Periodicidade</span>
         </div>
-        <span className="text-base font-medium">15min</span>
+        <span className="text-base font-medium">{periodicity}min</span>
       </div>
 
       <div className="mt-2">
