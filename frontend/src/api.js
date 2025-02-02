@@ -102,5 +102,15 @@ export const getStocks = async () => {
   return handleRequest(() => api.get("/stock/list/"));
 };
 
+// adiciona um novo ativo ao monitoramento
+export const addStock = async (data) => {
+  return handleRequest(() => api.post("/stock/create/", data));
+};
+
+// captura dados um ativo antes diretamente do yahoo finance
+export const fetchStockQuote = async (name, periodicity) => {
+  return handleRequest(() => api.get(`/stock/quote/?name=${name}&periodicity=${periodicity}`));
+};
+
 
 export default api;

@@ -1,7 +1,7 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.generics import ListAPIView
 from api.models import Stock
 from api.serializers.stock_serializers import StockSerializer
@@ -108,3 +108,40 @@ class StockProfileView(APIView):
 
         serializer = StockSerializer(stock)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+class StockQuoteView(APIView):
+    # retorna informações do ativo com base nos dados do Yahoo Finance e calcula os limites de compra/venda
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        asset_name = request.query_params.get("name")
+        periodicity = request.query_params.get("periodicity")
+
+        if not asset_name or not periodicity:
+            return Response({"error": "Os parâmetros 'name' e 'periodicity' são obrigatórios."}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            periodicity = int(periodicity)
+        except ValueError:
+            return Response({"error": "A periodicidade deve ser um número inteiro válido."}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # add .SA se não estiver presente
+        if not asset_name.endswith(".SA"):
+            asset_name += ".SA"
+
+        yahoo_data = get_yahoo_data(asset_name)
+        if not yahoo_data:
+            return Response({"error": "Não foi possível obter dados do ativo."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # calcula os limites de compra e venda
+        limits = calculate_limits(None, yahoo_data)
+        if limits is None:
+            return Response({"error": "Variação insuficiente para calcular os limites."}, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response({
+            "name": asset_name,
+            "current_price": yahoo_data['LTP'],
+            "buy_limit": limits['buy_limit'],
+            "sell_limit": limits['sell_limit'],
+            "periodicity": periodicity
+        }, status=status.HTTP_200_OK)
