@@ -20,10 +20,19 @@ const Stocks = () => {
   const [selectedStock, setSelectedStock] = useState(null);
   const [stocks, setStocks] = useState([]); 
   const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState(""); 
+  const [searchQuery, setSearchQuery] = useState("");
 
+  // checkboxes complementares
   const handleFilterChange = (filter) => {
-    setFilters((prev) => ({ ...prev, [filter]: !prev[filter] }));
+    setFilters((prev) => {
+      if (filter === "nearBuy") {
+        return { nearBuy: !prev.nearBuy, nearSell: false };
+      }
+      if (filter === "nearSell") {
+        return { nearBuy: false, nearSell: !prev.nearSell };
+      }
+      return prev;
+    });
   };
 
   const toggleEditMode = () => {
@@ -52,9 +61,29 @@ const Stocks = () => {
   }, []);
 
   // filtra os stocks pelo nome
-  const filteredStocks = stocks.filter((stock) =>
+  let displayedStocks = stocks.filter((stock) =>
     stock.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  // ordena pela proximidade do preço atual ao valor de compra 
+  if (filters.nearBuy) {
+    displayedStocks.sort((a, b) => {
+      const diffA = Math.abs(a.current_price - a.lower_limit);
+      const diffB = Math.abs(b.current_price - b.lower_limit);
+      return diffA - diffB;
+    });
+  }
+  // ordena pela proximidade do preço atual ao valor de venda
+  else if (filters.nearSell) {
+    displayedStocks = displayedStocks.filter(
+      (stock) => stock.current_price <= stock.upper_limit
+    );
+    displayedStocks.sort((a, b) => {
+      const diffA = a.upper_limit - a.current_price;
+      const diffB = b.upper_limit - b.current_price;
+      return diffA - diffB;
+    });
+  }
 
   return (
     <div className="w-full p-6">
@@ -136,8 +165,8 @@ const Stocks = () => {
         <p>Carregando ativos...</p>
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-          {filteredStocks.length > 0 ? (
-            filteredStocks.map((stock) => (
+          {displayedStocks.length > 0 ? (
+            displayedStocks.map((stock) => (
               <StockCard
                 key={stock.id}
                 ticker={stock.name}
