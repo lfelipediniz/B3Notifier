@@ -7,6 +7,7 @@ from api.models import Stock
 from utils.finance import get_yahoo_data, calculate_limits
 from dotenv import load_dotenv
 import resend
+from api.models import Alert
 
 load_dotenv()
 resend.api_key = os.getenv("RESEND_API_KEY")
@@ -108,6 +109,21 @@ def update_stock(stock_id):
         if rows_updated == 1:
             print(f"Ativo {stock.name} atingiu o limite superior. Enviando alerta...")
             send_stock_notification(stock, alert_type='upper')
+            
+            # convertendo o timestamp para o timezone do usuario
+            timestamp = timezone.localtime(timezone.now())
+            try:
+                # criando um alerta de venda no bd
+                Alert.objects.create(
+                    user=stock.user,
+                    stock=stock,
+                    asset_name=stock.name,
+                    alert_type='sell_suggestion',  
+                    timestamp=timestamp
+                )
+                print(f"Alerta de venda criado para {stock.name} com timestamp {timestamp}.")
+            except Exception as e:
+                print(f"Erro ao criar alerta de venda para {stock.name}: {e}")
         else:
             print(f"Alerta de venda para {stock.name} já foi enviado anteriormente.")
     
@@ -116,6 +132,18 @@ def update_stock(stock_id):
         if rows_updated == 1:
             print(f"Ativo {stock.name} atingiu o limite inferior. Enviando alerta...")
             send_stock_notification(stock, alert_type='lower')
+            timestamp = timezone.localtime(timezone.now())
+            try:
+                Alert.objects.create(
+                    user=stock.user,
+                    stock=stock,
+                    asset_name=stock.name,
+                    alert_type='buy_suggestion',  
+                    timestamp=timestamp
+                )
+                print(f"Alerta de compra criado para {stock.name} com timestamp {timestamp}.")
+            except Exception as e:
+                print(f"Erro ao criar alerta de compra para {stock.name}: {e}")
         else:
             print(f"Alerta de compra para {stock.name} já foi enviado anteriormente.")
     

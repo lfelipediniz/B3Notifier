@@ -4,12 +4,13 @@ import { Input } from "@/components/ui/input";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Clock, Search, Bell } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
-import FilterPopover from "@/components/FilterPopover";
-import { getAlerts, getStockUpdatesInfo } from "@/api";
+import { getAlerts, getStockUpdatesInfo, getStocks } from "@/api";
 
 const Alerts = () => {
   const [alerts, setAlerts] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [stocks, setStocks] = useState([]); 
+  const [loading, setLoading] = useState(true);
 
   // armazena informações de update nos ativos
   const [updateInfo, setUpdateInfo] = useState({
@@ -35,7 +36,6 @@ const Alerts = () => {
       console.error("Erro ao buscar informações de atualização:", error);
     }
   };
-
 
     // busca os ativos monitorados do usuario 
     useEffect(() => {
