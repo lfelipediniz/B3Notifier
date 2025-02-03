@@ -43,7 +43,7 @@ const Register = () => {
     try {
       const response = await sendOTP({ email: formData.email });
 
-      setUserExists(response.user_exists); 
+      setUserExists(response.user_exists);
 
       showToast(
         "Sucesso",
@@ -66,7 +66,7 @@ const Register = () => {
 
       showToast("Sucesso", "Código verificado!", "success");
 
-      // Apenas avança de etapa se a resposta da API estiver correta
+      // apenas avança de etapa se a resposta da API estiver correta
       if (response && response.message === "Código verificado com sucesso!") {
         setStep(3);
       } else {
@@ -120,7 +120,13 @@ const Register = () => {
 
         {/* step 1 - enviar o email pra verificacao */}
         {step === 1 && (
-          <>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              sendUserOTP();
+            }}
+            className="space-y-4"
+          >
             <p className="text-center text-[hsl(var(--lightgrey))]">
               Adicione o seu email que irá receber as notificações do mercado
             </p>
@@ -132,20 +138,26 @@ const Register = () => {
               onChange={(e) =>
                 setFormData({ ...formData, email: e.target.value })
               }
+              required
             />
-
             <Button
+              type="submit"
               className="w-full bg-[hsl(var(--grey))] text-white"
-              onClick={sendUserOTP}
             >
               Enviar
             </Button>
-          </>
+          </form>
         )}
 
-        {/* step 2 - validacao do email com codigo de verificacao */}
+       {/* step 2 - validacao do email com codigo de verificacao */}
         {step === 2 && (
-          <>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              verifyUserOTP();
+            }}
+            className="space-y-4"
+          >
             <p className="text-center text-[hsl(var(--foreground))]">
               Digite o código enviado para seu email
             </p>
@@ -171,8 +183,8 @@ const Register = () => {
               </InputOTP>
             </div>
             <Button
+              type="submit"
               className="w-full bg-[hsl(var(--grey))] text-white"
-              onClick={verifyUserOTP}
             >
               Verificar
             </Button>
@@ -181,15 +193,22 @@ const Register = () => {
               variant="outline"
               className="w-full mt-2"
               onClick={() => setStep(1)}
+              type="button"
             >
               Voltar
             </Button>
-          </>
+          </form>
         )}
 
         {/* step 3 - add informacoes finais */}
         {step === 3 && (
-          <>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              createAccount();
+            }}
+            className="space-y-4"
+          >
             <p className="text-center text-[hsl(var(--foreground))]">
               Preencha seus dados para concluir o cadastro
             </p>
@@ -202,6 +221,7 @@ const Register = () => {
               onChange={(e) =>
                 setFormData({ ...formData, username: e.target.value })
               }
+              required
             />
             <Input
               type="password"
@@ -212,6 +232,7 @@ const Register = () => {
               onChange={(e) =>
                 setFormData({ ...formData, password: e.target.value })
               }
+              required
             />
             <Input
               type="password"
@@ -220,20 +241,18 @@ const Register = () => {
               maxLength={20}
               value={formData.confirmPassword}
               onChange={(e) =>
-                setFormData({
-                  ...formData,
-                  confirmPassword: e.target.value,
-                })
+                setFormData({ ...formData, confirmPassword: e.target.value })
               }
+              required
             />
 
             <Button
+              type="submit"
               className="w-full bg-[hsl(var(--grey))] text-white"
-              onClick={createAccount}
             >
               {userExists ? "Atualizar" : "Criar"}
             </Button>
-          </>
+          </form>
         )}
       </CardContent>
     </Card>
@@ -267,7 +286,7 @@ const Register = () => {
               Faça login
             </span>
           </p>
-
+          
           {/* card com steps no mobile */}
           {renderCardSteps()}
         </div>

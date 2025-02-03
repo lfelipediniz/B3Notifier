@@ -31,7 +31,7 @@ const Login = () => {
   };
 
   // autentica o usuário e obter o token JWT
-  const { login } = useAuth(); 
+  const { login } = useAuth();
 
   const handleLogin = async () => {
     if (!formData.username || !formData.password) {
@@ -75,37 +75,45 @@ const Login = () => {
     <Card className="w-full max-w-md p-8 shadow-lg">
       <CardContent className="space-y-4">
         <h2 className="text-2xl font-bold text-center">Entrar</h2>
-        <>
-          <p className="text-center text-[hsl(var(--foreground))]">
-            Entre com seu nome de usuário e senha
-          </p>
-          <Input
-            type="text"
-            placeholder="Nome de usuário"
-            className="w-full"
-            maxLength={20}
-            value={formData.username}
-            onChange={(e) =>
-              setFormData({ ...formData, username: e.target.value })
-            }
-          />
-          <Input
-            type="password"
-            placeholder="Senha"
-            className="w-full"
-            maxLength={20}
-            value={formData.password}
-            onChange={(e) =>
-              setFormData({ ...formData, password: e.target.value })
-            }
-          />
-          <Button
-            className="w-full bg-[hsl(var(--grey))] text-white"
-            onClick={handleLogin}
-          >
-            Entrar
-          </Button>
-        </>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleLogin();
+          }}
+          className="space-y-4"
+        >
+          <>
+            <p className="text-center text-[hsl(var(--foreground))]">
+              Entre com seu nome de usuário e senha
+            </p>
+            <Input
+              type="text"
+              placeholder="Nome de usuário"
+              className="w-full"
+              maxLength={20}
+              value={formData.username}
+              onChange={(e) =>
+                setFormData({ ...formData, username: e.target.value })
+              }
+            />
+            <Input
+              type="password"
+              placeholder="Senha"
+              className="w-full"
+              maxLength={20}
+              value={formData.password}
+              onChange={(e) =>
+                setFormData({ ...formData, password: e.target.value })
+              }
+            />
+            <Button
+              type="submit"
+              className="w-full bg-[hsl(var(--grey))] text-white"
+            >
+              Entrar
+            </Button>
+          </>
+        </form>
       </CardContent>
     </Card>
   );
