@@ -174,3 +174,44 @@ class StockUpdatesInfoView(APIView):
         return Response({
             "last_update": last_update_overall.isoformat()
         }, status=status.HTTP_200_OK)
+        
+class StockTurnOnFakeView(APIView):
+    # ativa o modo fake para um ativo
+    permission_classes = [IsAuthenticated]
+
+    def patch(self, request, pk):  
+        try:
+            stock = Stock.objects.get(pk=pk, user=request.user)
+        except Stock.DoesNotExist:
+            return Response({"error": "Ativo não encontrado."}, status=status.HTTP_404_NOT_FOUND)
+        
+        stock.fake = True
+        stock.save()
+        serializer = StockSerializer(stock)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    
+# atualizar via input o limite inferior e superior do stock
+class StockUpdateLimitsView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def put(self, request, pk):
+        try:
+            stock = Stock.objects.get(pk=pk, user=request.user)
+        except Stock.DoesNotExist:
+            return Response({"error": "Ativo não encontrado."}, status=status.HTTP_404_NOT_FOUND)
+        
+        new_lower_limit = request.data.get("lower_limit")
+        new_upper_limit = request.data.get("upper_limit")
+        
+        if new_lower_limit is None and new_upper_limit is None:
+            return Response({"error": "Pelo menos um dos limites deve ser fornecido."}, status=status.HTTP_400_BAD_REQUEST)
+        
+        if new_lower_limit is not None:
+            stock.lower_limit = new_lower_limit
+        if new_upper_limit is not None:
+            stock.upper_limit = new_upper_limit
+        
+        stock.save()
+        serializer = StockSerializer(stock)
+        return Response(serializer.data, status=status.HTTP_200_OK)

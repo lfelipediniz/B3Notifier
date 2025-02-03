@@ -2,7 +2,7 @@ from django.urls import path
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from .views.user_views import UserProfileView, UserCreate, UserListView
 from .views.otp_views import SendOTPView, VerifyOTPView
-from .views.stock_views import StockCreateView, StockUpdateView, StockListView, StockDeleteView, StockProfileView, StockQuoteView, StockUpdatesInfoView
+from .views.stock_views import StockCreateView, StockUpdateView, StockListView, StockDeleteView, StockProfileView, StockQuoteView, StockUpdatesInfoView, StockTurnOnFakeView, StockUpdateLimitsView
 
 urlpatterns = [
     # envia o codigo OTP por email
@@ -27,6 +27,14 @@ urlpatterns = [
     path('stock/quote/', StockQuoteView.as_view(), name='stock_quote'),
     path("stocks/updates-info/", StockUpdatesInfoView.as_view(), name="stocks-updates-info"),
     
-    # usando para testes, apagar dps
+    # apagar depois, apenas para desenvolvimento
+    
+    # transforma o stock em fake para testar sistema de envio de email
+    path('stock/fake/<int:pk>/', StockTurnOnFakeView.as_view(), name='stock_fake'),
+    
+    # update nos limites de um ativo
+    path('stock/update-limit/<int:pk>/', StockUpdateLimitsView.as_view(), name='stock_update_limit'),
+    
+    # uexibe todos os usuários
     path('user/list/', UserListView.as_view(), name='list_users'),
 ]

@@ -9,6 +9,9 @@ class Stock(models.Model):
     lower_limit = models.DecimalField(max_digits=100, decimal_places=40, help_text="Limite inferior do túnel de preço")
     upper_limit = models.DecimalField(max_digits=100, decimal_places=40, help_text="Limite superior do túnel de preço")
     last_updated = models.DateTimeField(auto_now=True)
+    fake = models.BooleanField(default=False)
+    alert_upper_sent = models.BooleanField(default=False)
+    alert_lower_sent = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.name} - {self.user.username}"
