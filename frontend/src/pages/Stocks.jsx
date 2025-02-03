@@ -25,8 +25,6 @@ const Stocks = () => {
   // armazena informações de update nos ativos
   const [updateInfo, setUpdateInfo] = useState({
     last_update: null,
-    next_update: null,
-    time_until_next_update_seconds: null
   });
   
   // checkboxes complementares
@@ -65,8 +63,6 @@ const Stocks = () => {
       const data = await getStockUpdatesInfo();
       setUpdateInfo({
         last_update: data.last_update,
-        next_update: data.next_update,
-        time_until_next_update_seconds: data.time_until_next_update_seconds
       });
     } catch (error) {
       console.error("Erro ao buscar informações de atualização:", error);
@@ -92,7 +88,7 @@ const Stocks = () => {
     // atualizaçao nas infos de tempo de update
     const interval = setInterval(() => {
       fetchUpdateInfo();
-    }, 30000);
+    }, 60000); 
 
     return () => clearInterval(interval);
   }, []);

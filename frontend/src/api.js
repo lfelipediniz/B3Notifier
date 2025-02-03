@@ -19,22 +19,21 @@ const api = axios.create({
       }
     }]
   });
-  
-// intercepta as requisicoes para adicionar o token JWT
-api.interceptors.request.use((config) => {
+  // intercepta as requisicoes para adicionar o token JWT
+  api.interceptors.request.use((config) => {
     // lista de rotas que NÃO precisam de autenticação
     const publicRoutes = ["/user/send-otp/", "/user/verify-otp/", "/user/register/", "/token/"];
-  
     // se a URL da requisição estiver na lista de rotas públicas, remove o token
     if (!publicRoutes.some(route => config.url.includes(route))) {
-      const token = localStorage.getItem("access_token");
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-      }
+        const token = localStorage.getItem("access_token");
+        if (token) {
+            config.headers.Authorization = `Bearer ${token}`;
+        }
     }
+    console.log("Requisição: ", config.url, config.headers.Authorization);
     return config;
-  });
-  
+});
+
 
 // salva os tokens no localStorage e no axios
 const storeTokens = (access, refresh) => {

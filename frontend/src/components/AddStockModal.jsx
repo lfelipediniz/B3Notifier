@@ -19,7 +19,6 @@ import {
 } from "@/components/ui/select";
 import StockCard from "./StockCard";
 import { addStock, fetchStockQuote, getStocks } from "@/api";
-import EditStockModal from "./EditStockModal";
 
 const timeIntervals = [
   { label: "5 min", value: 5 },
@@ -36,9 +35,6 @@ const AddStockModal = ({ isOpen, onClose, onStockAdded }) => {
   const [loading, setLoading] = useState(false);
   const [fetchingQuote, setFetchingQuote] = useState(false);
   const [monitoredStocks, setMonitoredStocks] = useState([]);
-
-  // modal de edicao
-  const [isEditStockModalOpen, setIsEditStockModalOpen] = useState(false);
 
   // busca os ativos monitorados do usuário
   useEffect(() => {
@@ -112,10 +108,6 @@ const AddStockModal = ({ isOpen, onClose, onStockAdded }) => {
     }
   };
 
-  // salva o novo ativo e abre o modal de edição
-  const handleEditStock = () => {
-  };
-
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-lg p-6 bg-[hsl(var(--background))] rounded-lg shadow-lg">
@@ -131,10 +123,10 @@ const AddStockModal = ({ isOpen, onClose, onStockAdded }) => {
           </DialogDescription>
         </DialogHeader>
 
-        <div className="flex items-center w-full  mb-4">
+        <div className="flex items-center w-full mb-4">
           <div className="relative flex-1">
             <Search
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+              className="absolute text-[hsl(var(--lightgrey))] -translate-y-1/2 left-3 top-1/2"
               size={20}
             />
             <Input

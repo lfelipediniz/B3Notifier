@@ -13,7 +13,7 @@ app.autodiscover_tasks()
 # cofigs de agendamento (Celery Beat)
 app.conf.beat_schedule = {
     'check-stocks-every-minute': {
-        'task': 'api.tasks.check_and_update_stocks_global',  # Certifique-se de usar o caminho correto
-        'schedule': crontab(),  # executa a cada minuto (você pode usar: 'schedule': 60.0, se preferir segundos)
+        'task': 'api.tasks.check_and_update_stocks_global', 
+        'schedule': crontab(),  
     },
 }

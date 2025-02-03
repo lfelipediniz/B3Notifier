@@ -23,16 +23,16 @@ def update_stock(stock_id):
             stock.current_price = limits['PBT']
             stock.lower_limit = limits['buy_limit']
             stock.upper_limit = limits['sell_limit']
-            # atualiza a data da última atualização
-            stock.last_updated = timezone.now()
-            stock.save()
-            return f"{stock.name} atualizado com sucesso."
+            result = f"{stock.name} atualizado com sucesso."
         else:
-            stock.last_updated = timezone.now()
-            return f"Variação insuficiente para atualizar {stock.name}."
+            result = f"Variação insuficiente para atualizar {stock.name}."
     else:
-        return f"Não foi possível obter dados para {stock.name}."
-
+        result = f"Não foi possível obter dados para {stock.name}."
+    
+    # atualiza a data da última verificao do ativo
+    stock.last_updated = timezone.now()
+    stock.save()
+    return result
 
 @shared_task
 def check_and_update_stocks_for_user(user_id):

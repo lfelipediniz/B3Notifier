@@ -153,7 +153,6 @@ class StockUpdatesInfoView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        now = timezone.now()
         stocks = Stock.objects.filter(user=request.user)
 
         if not stocks.exists():
@@ -172,23 +171,6 @@ class StockUpdatesInfoView(APIView):
         # útima atualizacao geral
         last_update_overall = max(last_updates)
 
-        # proximo update com base na periodicidade de cada ativo
-        next_updates = []
-        for stock in stocks:
-            if stock.last_updated:
-                next_time = stock.last_updated + timedelta(minutes=stock.periodicity)
-                next_updates.append(next_time)
-
-        #  atualização mais próxima entre os ativos monitorados
-        if next_updates:
-            next_update_overall = min(next_updates)
-            time_until_next_update = (next_update_overall - now).total_seconds()
-        else:
-            next_update_overall = None
-            time_until_next_update = None
-
         return Response({
-            "last_update": last_update_overall.isoformat(),
-            "next_update": next_update_overall.isoformat() if next_update_overall else None,
-            "time_until_next_update_seconds": time_until_next_update,
+            "last_update": last_update_overall.isoformat()
         }, status=status.HTTP_200_OK)
