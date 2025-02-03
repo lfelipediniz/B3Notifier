@@ -30,7 +30,7 @@ const api = axios.create({
             config.headers.Authorization = `Bearer ${token}`;
         }
     }
-    console.log("Requisição: ", config.url, config.headers.Authorization);
+    // console.log("Requisição: ", config.url, config.headers.Authorization);
     return config;
 });
 

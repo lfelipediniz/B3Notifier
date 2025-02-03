@@ -24,19 +24,27 @@ def send_stock_notification(stock, alert_type):
         html_message = (
             f"<p>Olá,</p>"
             f"<p>O ativo <strong>{stock.name}</strong> atingiu o limite superior de "
-            f"<strong>{stock.upper_limit}</strong>.<br>"
-            f"Sua cotação atual é <strong>{stock.current_price}</strong>.<br>"
+            f"<strong>{stock.upper_limit:.2f}</strong>.<br>"
+            f"Sua cotação atual é <strong>{stock.current_price:.2f}</strong>.<br>"
             f"Recomendamos que você avalie a venda deste ativo.</p>"
         )
+        
+        # substituindo o ponto por vírgula e formatando as casas decimais
+        html_message = html_message.replace(f"{stock.upper_limit:.2f}", f"{stock.upper_limit:.2f}".replace('.', ','))
+        html_message = html_message.replace(f"{stock.current_price:.2f}", f"{stock.current_price:.2f}".replace('.', ','))
+
     elif alert_type == 'lower':
         subject = f"Recomendação: Comprar {stock.name}"
         html_message = (
             f"<p>Olá,</p>"
             f"<p>O ativo <strong>{stock.name}</strong> atingiu o limite inferior de "
-            f"<strong>{stock.lower_limit}</strong>.<br>"
-            f"Sua cotação atual é <strong>{stock.current_price}</strong>.<br>"
+            f"<strong>{stock.lower_limit:.2f}</strong>.<br>"
+            f"Sua cotação atual é <strong>{stock.current_price:.2f}</strong>.<br>"
             f"Recomendamos que você avalie a compra deste ativo.</p>"
         )
+
+        html_message = html_message.replace(f"{stock.lower_limit:.2f}", f"{stock.lower_limit:.2f}".replace('.', ','))
+        html_message = html_message.replace(f"{stock.current_price:.2f}", f"{stock.current_price:.2f}".replace('.', ','))
     else:
         print("Alerta Inválido.")
         return

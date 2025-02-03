@@ -1,15 +1,11 @@
 import React from "react";
-import { Link, useLocation } from "react-router-dom";
+import { NavLink, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { ScanSearch } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const Header = () => {
   const { isAuthenticated, user, logout } = useAuth();
-  const location = useLocation();
-
-  // para conferir se a rota atual e a mesma que a rota passada
-  const isActive = (path) => location.pathname === path;
 
   return (
     <header className="flex full-width-header items-center justify-between p-4 border-b border-[hsl(var(--midwhite))] bg-[hsl(var(--white))]">
@@ -22,27 +18,31 @@ const Header = () => {
 
       {/* navegacao */}
       <nav className="flex items-center gap-6 text-sm">
-        <Link
+        <NavLink
           to="/stocks"
-          className={`font-medium ${
-            isActive("/stocks")
-              ? "text-[hsl(var(--grey))]"
-              : "text-[hsl(var(--lightgrey))]"
-          }`}
+          className={({ isActive }) =>
+            `font-medium ${
+              isActive
+                ? "text-[hsl(var(--grey))]"
+                : "text-[hsl(var(--lightgrey))]"
+            }`
+          }
         >
           Ativos
-        </Link>
+        </NavLink>
 
-        <Link
+        <NavLink
           to="/alerts"
-          className={`font-medium ${
-            isActive("/alerts")
-              ? "text-[hsl(var(--grey))]"
-              : "text-[hsl(var(--lightgrey))]"
-          }`}
+          className={({ isActive }) =>
+            `font-medium ${
+              isActive
+                ? "text-[hsl(var(--grey))]"
+                : "text-[hsl(var(--lightgrey))]"
+            }`
+          }
         >
           Alertas
-        </Link>
+        </NavLink>
       </nav>
 
       {/* avatar aparece apenas na versao desktop */}
@@ -53,10 +53,7 @@ const Header = () => {
           </span>
           <Link to="/" className="cursor-pointer" onClick={logout}>
             <Avatar className="cursor-pointer">
-              <AvatarImage
-                src={user?.avatar}
-                alt={user?.username}
-              />
+              <AvatarImage src={user?.avatar} alt={user?.username} />
               <AvatarFallback className="bg-[hsl(var(--midwhite))] text-[hsl(var(--grey))]">
                 {user?.username?.[0] || "U"}
               </AvatarFallback>
@@ -64,6 +61,7 @@ const Header = () => {
           </Link>
         </div>
       )}
+
       {/* botao de sair exibido no lugar do avatar no mobile */}
       {isAuthenticated && (
         <button
