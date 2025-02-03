@@ -5,11 +5,61 @@ import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Clock, Search, Bell } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import FilterPopover from "@/components/FilterPopover";
-import { getAlerts } from "@/api";
+import { getAlerts, getStockUpdatesInfo } from "@/api";
 
 const Alerts = () => {
   const [alerts, setAlerts] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
+
+  // armazena informações de update nos ativos
+  const [updateInfo, setUpdateInfo] = useState({
+    last_update: null,
+  });
+
+  // formata o tempo decorrido
+  const getTimeElapsed = (timestamp) => {
+    if (!timestamp) return "Desconhecido";
+    const diffInSeconds = Math.floor((new Date() - new Date(timestamp)) / 1000);
+    if (diffInSeconds < 60) return `${diffInSeconds} s`;
+    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} min`;
+    return `${Math.floor(diffInSeconds / 3600)} h`;
+  };
+
+  const fetchUpdateInfo = async () => {
+    try {
+      const data = await getStockUpdatesInfo();
+      setUpdateInfo({
+        last_update: data.last_update,
+      });
+    } catch (error) {
+      console.error("Erro ao buscar informações de atualização:", error);
+    }
+  };
+
+
+    // busca os ativos monitorados do usuario 
+    useEffect(() => {
+      const fetchStocks = async () => {
+        try {
+          const response = await getStocks();
+          setStocks(response);
+        } catch (error) {
+          console.error("Erro ao carregar ativos:", error);
+        } finally {
+          setLoading(false);
+        }
+      };
+  
+      fetchStocks();
+      fetchUpdateInfo();
+  
+      // atualizaçao nas infos de tempo de update
+      const interval = setInterval(() => {
+        fetchUpdateInfo();
+      }, 60000); 
+  
+      return () => clearInterval(interval);
+    }, []);
 
   useEffect(() => {
     const fetchAlerts = async () => {
@@ -105,17 +155,17 @@ const Alerts = () => {
   const getAlertStyles = (alertType) => {
     switch (alertType) {
       case "buy_suggestion":
-        return { text: "text-[hsl(var(--green))]" }; 
+        return { text: "text-[hsl(var(--green))]" };
       case "sell_suggestion":
-        return { text: "text-[hsl(var(--red))]" }; 
+        return { text: "text-[hsl(var(--red))]" };
       case "addition":
-        return { text: "text-[#1E88E5]" }; 
+        return { text: "text-[#1E88E5]" };
       case "removal":
-        return { text: "text-[#FBC02D]" }; 
+        return { text: "text-[#FBC02D]" };
       case "edition":
-        return { text: "text-[#7B1FA2]" }; 
+        return { text: "text-[#7B1FA2]" };
       default:
-        return { text: "text-[hsl(var(--grey))]" }; 
+        return { text: "text-[hsl(var(--grey))]" };
     }
   };
 
@@ -126,7 +176,11 @@ const Alerts = () => {
         <div className="hidden md:block">
           <div className="flex items-center gap-2">
             <Badge variant="outline" className="flex items-center gap-1">
-              <Clock size={16} /> Última atualização: 10 min
+              <Clock size={16} />
+              Última Atualização:{" "}
+              {updateInfo.last_update
+                ? getTimeElapsed(updateInfo.last_update)
+                : "Carregando..."}
             </Badge>
           </div>
         </div>
