@@ -9,7 +9,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Plus, Settings, Search, Clock } from "lucide-react";
 import { Input } from "./ui/input";
-
 import {
   Select,
   SelectContent,
@@ -18,7 +17,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import StockCard from "./StockCard";
-import { addStock, fetchStockQuote, getStocks } from "@/api";
+import { addStock, fetchStockQuote, getStocks, addAlert } from "@/api";
+import { format, toZonedTime } from "date-fns-tz";
 
 const timeIntervals = [
   { label: "5 min", value: 5 },
@@ -81,11 +81,8 @@ const AddStockModal = ({ isOpen, onClose, onStockAdded }) => {
     );
 
   const handleAddStock = async () => {
-    if (!assetName.trim() || !stockData) {
-      return;
-    }
+    if (!assetName.trim() || !stockData) return;
     setLoading(true);
-
     const normalizedAssetName = getNormalizedAssetName(assetName);
     const data = {
       name: normalizedAssetName,
@@ -94,9 +91,25 @@ const AddStockModal = ({ isOpen, onClose, onStockAdded }) => {
 
     try {
       const response = await addStock(data);
-      if (onStockAdded) {
-        onStockAdded(response);
-      }
+      if (onStockAdded) onStockAdded(response);
+
+      // criando um alerta de adiçao
+      const now = new Date();
+      const timeZone = "America/Sao_Paulo";
+      const zonedDate = toZonedTime(now, timeZone);
+
+      const alert_date = format(zonedDate, "yyyy-MM-dd", { timeZone });
+      const alert_time = format(zonedDate, "HH:mm", { timeZone });
+      console.log(alert_date, alert_time);
+
+      const alertData = {
+        asset_name: normalizedAssetName,
+        alert_type: "addition",
+        alert_date,
+        alert_time,
+      };
+
+      await addAlert(alertData);
       onClose();
     } catch (error) {
       console.error(
@@ -142,7 +155,10 @@ const AddStockModal = ({ isOpen, onClose, onStockAdded }) => {
             />
           </div>
 
-          <Button onClick={handleSearch} className="ml-2 bg-[hsl(var(--lightgrey))]">
+          <Button
+            onClick={handleSearch}
+            className="ml-2 bg-[hsl(var(--lightgrey))]"
+          >
             Pesquisar
           </Button>
         </div>

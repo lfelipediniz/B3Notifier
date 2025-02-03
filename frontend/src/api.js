@@ -126,5 +126,14 @@ export const getStockUpdatesInfo = async () => {
   return handleRequest(() => api.get("/stocks/updates-info/"));
 };
 
+// adiciona alerta no historico de alertas
+export const addAlert = async (data) => {
+  return handleRequest(() => api.post("/alert/create/", data));
+};
+
+// captura os alertas do usuario
+export const getAlerts = async () => {
+  return handleRequest(() => api.get("/alert/list/"));
+};
 
 export default api;

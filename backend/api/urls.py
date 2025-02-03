@@ -3,7 +3,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from .views.user_views import UserProfileView, UserCreate, UserListView
 from .views.otp_views import SendOTPView, VerifyOTPView
 from .views.stock_views import StockCreateView, StockUpdateView, StockListView, StockDeleteView, StockProfileView, StockQuoteView, StockUpdatesInfoView, StockTurnOnFakeView, StockUpdateLimitsView
-
+from .views.alert_views import AlertCreateView, UserAlertListView
 urlpatterns = [
     # envia o codigo OTP por email
     path('user/send-otp/', SendOTPView.as_view(), name='send_otp'),
@@ -27,8 +27,11 @@ urlpatterns = [
     path('stock/quote/', StockQuoteView.as_view(), name='stock_quote'),
     path("stocks/updates-info/", StockUpdatesInfoView.as_view(), name="stocks-updates-info"),
     
-    # apagar depois, apenas para desenvolvimento
+    # endpoints dos alertas
+    path('alert/create/', AlertCreateView.as_view(), name='alert_create'),
+    path('alert/list/', UserAlertListView.as_view(), name='alert_list'),
     
+    # apagar depois, apenas para desenvolvimento
     # transforma o stock em fake para testar sistema de envio de email
     path('stock/fake/<int:pk>/', StockTurnOnFakeView.as_view(), name='stock_fake'),
     
