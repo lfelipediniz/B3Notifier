@@ -102,13 +102,18 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
+# definindo o caminho do banco de dados 
+if os.getenv("RENDER"):  # se existir que dizer que estamos em producao
+    DB_PATH = "/var/data/db.sqlite3"  
+else:
+    DB_PATH = BASE_DIR / "db.sqlite3"  # local
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'NAME': DB_PATH,
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
