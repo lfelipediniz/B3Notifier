@@ -11,9 +11,9 @@ echo "Redis disponível!"
 gunicorn backend.wsgi &
 
 # worker do Celery
-celery -A backend worker -l INFO --broker=redis://<usuario>:<senha>@redis.com:6379/0 &
+celery -A backend worker -l INFO
 
 # Celery Beat
-celery -A backend beat -l INFO --broker=redis://<usuario>:<senha>@redis.com:6379/0 &
+celery -A backend beat -l INFO
 
 wait
