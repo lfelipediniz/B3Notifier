@@ -2,7 +2,10 @@
 <p align="center">
   <img src="/frontend/public/b3notifier.svg" alt="B3Notifier Logo" width="150">
 </p>
-A system built to help investors on the Brazilian stock exchange (B3), monitoring stock quotes, sending custom alerts, and notifying by email whenever good buy or sell opportunities arise!
+A system designed to assist investors in the Brazilian stock exchange (B3) by tracking stock quotes, sending custom alerts, and notifying users via email whenever promising buy or sell opportunities arise!
+
+### Tip
+The deployment was carried out using cloud platforms. Feel free to test it beyond localhost: [B3 Notifier](http://b3notifier.me)
 
 ## Table of Contents
 1. [Introduction](#introduction) 
