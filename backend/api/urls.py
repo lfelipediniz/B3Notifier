@@ -31,13 +31,13 @@ urlpatterns = [
     path('alert/create/', AlertCreateView.as_view(), name='alert_create'),
     path('alert/list/', UserAlertListView.as_view(), name='alert_list'),
     
-    # apagar depois, apenas para desenvolvimento
+    # aapenas para desenvolvimento
     # transforma o stock em fake para testar sistema de envio de email
     path('stock/fake/<int:pk>/', StockTurnOnFakeView.as_view(), name='stock_fake'),
     
     # update nos limites de um ativo
     path('stock/update-limit/<int:pk>/', StockUpdateLimitsView.as_view(), name='stock_update_limit'),
     
-    # uexibe todos os usuários
+    # exibe todos os usuários
     path('user/list/', UserListView.as_view(), name='list_users'),
 ]

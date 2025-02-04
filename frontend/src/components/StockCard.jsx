@@ -35,18 +35,18 @@ const StockCard = ({ ticker, price, buy, sell, periodicity, isEditMode, onEdit }
 
       <div className="flex items-center justify-between mt-4">
         <div className="flex items-center space-x-1">
-          <SquareArrowDown className="w-5 h-5 text-[hsl(var(--lightgrey))]" />
-          <span className="text-base text-[hsl(var(--lightgrey))]">Comprar</span>
+          <SquareArrowUp className="w-5 h-5 text-[hsl(var(--lightgrey))]" />
+          <span className="text-base text-[hsl(var(--lightgrey))]">Vender</span>
         </div>
-        <span className="text-lg font-bold text-[hsl(var(--green))]">R$ {buy.toFixed(2).replace(".", ",")}</span>
+        <span className="text-lg font-bold text-[hsl(var(--green))]">R$ {sell.toFixed(2).replace(".", ",")}</span>
       </div>
 
       <div className="flex items-center justify-between mt-2">
         <div className="flex items-center space-x-1">
-          <SquareArrowUp className="w-5 h-5 text-[hsl(var(--lightgrey))]" />
-          <span className="text-base text-[hsl(var(--lightgrey))]">Vender</span>
+          <SquareArrowDown className="w-5 h-5 text-[hsl(var(--lightgrey))]" />
+          <span className="text-base text-[hsl(var(--lightgrey))]">Comprar</span>
         </div>
-        <span className="text-lg font-bold text-[hsl(var(--red))]">R$ {sell.toFixed(2).replace(".", ",")}</span>
+        <span className="text-lg font-bold text-[hsl(var(--red))]">R$ {buy.toFixed(2).replace(".", ",")}</span>
       </div>
     </Card>
   );

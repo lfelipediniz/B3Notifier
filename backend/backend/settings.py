@@ -25,7 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-e=q@7tdye#0__wydej-3e*$1h59xpi2hro!fi!f!t6lu3w=#b7'
+SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -156,6 +156,6 @@ CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
 
 # configs do Celery (utilizando o Redis como broker)
-CELERY_BROKER_URL = 'redis://default:EYVoWfDNuq2ViYJ5gJMqzjD7zTNDc2JO@redis-16399.crce181.sa-east-1-2.ec2.redns.redis-cloud.com:16399'
-CELERY_RESULT_BACKEND = 'redis://default:EYVoWfDNuq2ViYJ5gJMqzjD7zTNDc2JO@redis-16399.crce181.sa-east-1-2.ec2.redns.redis-cloud.com:16399'
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
 CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
