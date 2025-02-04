@@ -1,3 +1,4 @@
+#!/bin/bash
 set -e
 
 # aguardadno o Redis ficar disponivel
