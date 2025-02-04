@@ -19,15 +19,17 @@ User = get_user_model() # pega o model de usuario do Django para as taks serem p
 def send_stock_notification(stock, alert_type):
     # envia um email para usuario de alerta de compra ou venda
     user_email = stock.user.email
+    user_name = stock.user.username
 
     if alert_type == 'upper':
         subject = f"Recomendação: Vender {stock.name}"
         html_message = (
-            f"<p>Olá,</p>"
+            f"<p>Olá, {user_name}!</p>"
             f"<p>O ativo <strong>{stock.name}</strong> atingiu o limite superior de "
             f"<strong>{stock.upper_limit:.2f}</strong>.<br>"
             f"Sua cotação atual é <strong>{stock.current_price:.2f}</strong>.<br>"
             f"Recomendamos que você avalie a venda deste ativo.</p>"
+            f"<p>Atenciosamente,<br>B3Notifier</p>"
         )
         
         # substituindo o ponto por vírgula e formatando as casas decimais
@@ -37,11 +39,12 @@ def send_stock_notification(stock, alert_type):
     elif alert_type == 'lower':
         subject = f"Recomendação: Comprar {stock.name}"
         html_message = (
-            f"<p>Olá,</p>"
+            f"<p>Olá, {user_name}!</p>"
             f"<p>O ativo <strong>{stock.name}</strong> atingiu o limite inferior de "
             f"<strong>{stock.lower_limit:.2f}</strong>.<br>"
             f"Sua cotação atual é <strong>{stock.current_price:.2f}</strong>.<br>"
             f"Recomendamos que você avalie a compra deste ativo.</p>"
+            f"<p>Atenciosamente,<br>B3Notifier</p>"
         )
 
         html_message = html_message.replace(f"{stock.lower_limit:.2f}", f"{stock.lower_limit:.2f}".replace('.', ','))
@@ -61,6 +64,7 @@ def send_stock_notification(stock, alert_type):
         print(f"Email enviado com sucesso para {user_email} ({alert_type}) sobre {stock.name}.")
     except Exception as e:
         print(f"Erro ao enviar email para {user_email}: {e}")
+
 
 
 @shared_task

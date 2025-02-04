@@ -156,6 +156,6 @@ CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
 
 # configs do Celery (utilizando o Redis como broker)
-CELERY_BROKER_URL = 'redis://localhost:6379/0'
-CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+CELERY_BROKER_URL = 'redis://default:EYVoWfDNuq2ViYJ5gJMqzjD7zTNDc2JO@redis-16399.crce181.sa-east-1-2.ec2.redns.redis-cloud.com:16399'
+CELERY_RESULT_BACKEND = 'redis://default:EYVoWfDNuq2ViYJ5gJMqzjD7zTNDc2JO@redis-16399.crce181.sa-east-1-2.ec2.redns.redis-cloud.com:16399'
 CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
