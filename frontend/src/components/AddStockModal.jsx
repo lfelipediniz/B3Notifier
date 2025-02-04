@@ -110,6 +110,7 @@ const AddStockModal = ({ isOpen, onClose, onStockAdded }) => {
       };
 
       await addAlert(alertData);
+      window.location.reload();
       onClose();
     } catch (error) {
       console.error(

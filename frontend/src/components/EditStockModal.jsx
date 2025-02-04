@@ -75,6 +75,7 @@ const EditStockModal = ({ isOpen, onClose, stock, onStockUpdated }) => {
       };
 
       await addAlert(alertData);
+      window.location.reload();
       
       if (onStockUpdated) {
         onStockUpdated(response);
@@ -112,6 +113,7 @@ const EditStockModal = ({ isOpen, onClose, stock, onStockUpdated }) => {
       };
 
       await addAlert(alertData);
+      window.location.reload();
       
       if (onStockUpdated) {
         onStockUpdated({ id: stock.id, deleted: true });
