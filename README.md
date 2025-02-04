@@ -47,7 +47,7 @@ A system built to help investors on the Brazilian stock exchange (B3), monitorin
 
 2. **Create and activate a virtual environment** (recommended):
    ```bash
-   python -m venv venv
+   python3 -m venv venv
    source venv/bin/activate     
    ```
 
