@@ -5,7 +5,7 @@
 A system designed to assist investors in the Brazilian stock exchange (B3) by tracking stock quotes, sending custom alerts, and notifying users via email whenever promising buy or sell opportunities arise!
 
 ### Tip
-The deployment was carried out using cloud platforms. Feel free to test it beyond localhost: [B3 Notifier](http://b3notifier.me) (FEATURE STILL TESTED)
+The deployment was carried out using cloud platforms. Feel free to test it beyond localhost: [B3 Notifier](http://b3notifier.me) (As it is in the cloud, resources are more limited)
 ## Table of Contents
 1. [Introduction](#introduction) 
 2. [Requirements](#requirements)
