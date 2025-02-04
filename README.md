@@ -73,12 +73,16 @@ A system built to help investors on the Brazilian stock exchange (B3), monitorin
 
 ### Running in the Backend Folder
 
-1. **Apply migrations**:
+1. **Make migrations**:
+   ```bash
+   python manage.py makemigrations
+   ```
+3. **Apply migrations**:
    ```bash
    python manage.py migrate
    ```
 
-2. **Start the Django server**:
+3. **Start the Django server**:
    ```bash
    python manage.py runserver
    ```
