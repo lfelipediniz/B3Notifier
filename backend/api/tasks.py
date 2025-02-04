@@ -92,7 +92,6 @@ def update_stock(stock_id):
                 print(f"Ativo {stock.name} atualizado com novos limites.")
             else:
                 print(f"Variação insuficiente para atualizar {stock.name}.")
-                return f"Variação insuficiente para atualizar {stock.name}."
         else:
             print(f"Não foi possível obter dados para {stock.name}.")
             return f"Não foi possível obter dados para {stock.name}."
