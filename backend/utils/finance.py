@@ -1,5 +1,6 @@
-import yfinance as yf
 import statistics
+import requests
+import os
 
 # constantes pro calculo de limites
 LIQUIDITY_THRESHOLD = 1000000      # volume ≥ 1.000.000 → alta liquidez
@@ -10,47 +11,54 @@ UPDATE_PERCENTAGE = 1.0            # é para atualizar se variação do PBT for 
 # https://www.b3.com.br/data/files/B7/04/ED/E1/87A7061099BE5706790D8AA8/Metodologia-de-Calculo-de-Tuneis-de-Negociacao.pdf
 # e no conteudo encaminhado no desafio
 
-def get_yahoo_data(stock):
-    # captura os dados da api do Yahoo Finance pro ativo especificado
-    ticker = yf.Ticker(stock)
+def get_stock_data(stock):
+    # captura os dados da api do ALPHA VANTAGE pro ativo especificado
+    API_KEY = os.getenv("ALPHA_VANTAGE_API_KEY")
+    url = f'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol={stock}&apikey={API_KEY}'
     
     try:
-        info = ticker.info  
+        response = requests.get(url)
+        data = response.json()
     except Exception as e:
         print(f"Erro ao tentar acessar o ticker.info: {e}") 
-        info = {}
+        return None
 
-    if not info:
+    # ve se houve erro ou se foi atingido o limite de requests
+    if "Error Message" in data or "Note" in data:
+        print("Erro ou limite de requisições atingido, aguarde alguns minutos:", data)
+        return None
+
+    time_series = data.get("Time Series (Daily)")
+    if not time_series:
+        return None
+
+    # pega os dados mais recentes do ativo
+    sorted_dates = sorted(time_series.keys())
+    last_date = sorted_dates[-1]
+    last_data = time_series[last_date]
+
+    try:
+        last_traded_price = float(last_data.get("4. close"))
+        volume = int(last_data.get("5. volume"))
+    except (TypeError, ValueError) as e:
+        print(f"Erro ao converter os dados do ativo: {e}")
+        return None
+
+    # como essa nova API nao fornece best bid e best offer, vamos pegar o último preço negociado
+    best_bid = last_traded_price
+    best_offer = last_traded_price
+
+    historical_prices = []
+    for date in sorted_dates:
         try:
-            info = ticker.fast_info # tenta acessar o fast_info caso o info falhe
+            price = float(time_series[date].get("4. close"))
+            historical_prices.append(price)
         except Exception as e:
-            print(f"Erro ao tentar acessar o ticker.fast_info: {e}")  
-            info = {}
+            print(f"Erro ao processar o preço do dia {date}: {e}")
+            continue
 
-    # get nos precos e volumes do ativo
-    last_traded_price = info.get('regularMarketPrice') or info.get('lastPrice')
-    volume = info.get('volume') or info.get('regularMarketVolume')
-    best_bid = info.get('bid')
-    best_offer = info.get('ask')
-    
-    # se nao tivermos essa informacao, tentamos pegar do historico
-    if last_traded_price is None:
-        hist_intraday = ticker.history(period="1d", interval="1m")
-        if not hist_intraday.empty:
-            last_traded_price = hist_intraday['Close'].iloc[-1]
-    
-    if last_traded_price is None:
-        return None  # nao foi possivel obter o preço atual
-    
-    if best_bid is None:
-        best_bid = last_traded_price
-    if best_offer is None:
-        best_offer = last_traded_price
-
-    # pega o historico de precos do ativo usa o ultimo preco conhecido se nao tiver historico
-    hist = ticker.history(period="1mo", interval="1d")
-    historical_prices = hist['Close'].tolist() if not hist.empty else [last_traded_price]
-    
+    if not historical_prices:
+        historical_prices = [last_traded_price]
     return {
         'LTP': last_traded_price,
         'BestBid': best_bid,
@@ -68,12 +76,12 @@ def calculate_volatility(historical_prices):
     std_dev = statistics.stdev(historical_prices)
     return (std_dev / mean_price) * 100
 
-def calculate_limits(old_PBT, yahoo_data):
+def calculate_limits(old_PBT, stock_data):
     # calcula o PBT (preço base de referencia) e os limites de compra e venda com base nos dados do yahoo 
     
     # para escolher o melhor metodo de calculo vamos nos basear na liquidez e volatilidade
-    liquidity = "high" if yahoo_data.get('Volume') and yahoo_data['Volume'] >= LIQUIDITY_THRESHOLD else "low"
-    volatility = calculate_volatility(yahoo_data['HistoricalPrices'])
+    liquidity = "high" if stock_data.get('Volume') and stock_data['Volume'] >= LIQUIDITY_THRESHOLD else "low"
+    volatility = calculate_volatility(stock_data['HistoricalPrices'])
     
     # determinando as bandas
     if liquidity == "high" and volatility <= VOLATILITY_THRESHOLD:
@@ -90,9 +98,9 @@ def calculate_limits(old_PBT, yahoo_data):
         sell_band = 1.5
     
     # ultimo preco negociado do ativo
-    LTP = yahoo_data['LTP']
-    best_bid = yahoo_data['BestBid']
-    best_offer = yahoo_data['BestOffer']
+    LTP = stock_data['LTP']
+    best_bid = stock_data['BestBid']
+    best_offer = stock_data['BestOffer']
 
     # calculo do PBT 
     if best_bid <= LTP <= best_offer:
