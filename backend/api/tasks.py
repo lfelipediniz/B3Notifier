@@ -4,7 +4,7 @@ from celery import shared_task
 from django.utils import timezone
 from django.contrib.auth import get_user_model
 from api.models import Stock
-from utils.finance import get_yahoo_data, calculate_limits
+from utils.finance import get_stock_data, calculate_limits
 from dotenv import load_dotenv
 import resend
 from api.models import Alert
@@ -82,9 +82,9 @@ def update_stock(stock_id):
     # ativos fakes foram usados pra testar o sistema de envio de email, 
     # entao eles nao podem ser atualizados com dados da api do yahoo
     if not stock.fake:
-        yahoo_data = get_yahoo_data(stock.name)
-        if yahoo_data:
-            limits = calculate_limits(float(stock.current_price), yahoo_data)
+        stock_data = get_stock_data(stock.name)
+        if stock_data:
+            limits = calculate_limits(float(stock.current_price), stock_data)
             if limits:
                 stock.current_price = limits['PBT']
                 stock.lower_limit = limits['buy_limit']

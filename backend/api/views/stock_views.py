@@ -5,7 +5,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.generics import ListAPIView
 from api.models import Stock
 from api.serializers.stock_serializers import StockSerializer
-from utils.finance import get_yahoo_data, calculate_limits
+from utils.finance import get_stock_data, calculate_limits
 from datetime import timedelta
 from django.utils import timezone
 
@@ -23,12 +23,12 @@ class StockCreateView(APIView):
         if Stock.objects.filter(user=request.user, name=asset_name).exists():
             return Response({"error": "Este ativo já está sendo monitorado."}, status=status.HTTP_400_BAD_REQUEST)
         
-        yahoo_data = get_yahoo_data(asset_name)
-        if not yahoo_data:
+        stock_data = get_stock_data(asset_name)
+        if not stock_data:
             return Response({"error": "Não foi possível obter dados do ativo."}, status=status.HTTP_400_BAD_REQUEST)
         
         # calcula os valores iniciais (PBT e limites)
-        limits = calculate_limits(None, yahoo_data)
+        limits = calculate_limits(None, stock_data)
         if limits is None:
             return Response({"error": "Variação insuficiente para atualização."}, status=status.HTTP_400_BAD_REQUEST)
         
@@ -60,11 +60,11 @@ class StockUpdateView(APIView):
             except ValueError:
                 return Response({"error": "A periodicidade tem que ser um número inteiro válido."}, status=status.HTTP_400_BAD_REQUEST)
         
-        yahoo_data = get_yahoo_data(stock.name)
-        if not yahoo_data:
+        stock_data = get_stock_data(stock.name)
+        if not stock_data:
             return Response({"error": "Não foi possível obter dados do ativo."}, status=status.HTTP_400_BAD_REQUEST)
         
-        limits = calculate_limits(float(stock.current_price), yahoo_data)
+        limits = calculate_limits(float(stock.current_price), stock_data)
         if limits is None:
             # mesmo a variaçao seja insuficiente, salvamos a nova periodicidade
             stock.save()
@@ -131,18 +131,18 @@ class StockQuoteView(APIView):
         if not asset_name.endswith(".SA"):
             asset_name += ".SA"
 
-        yahoo_data = get_yahoo_data(asset_name)
-        if not yahoo_data:
+        stock_data = get_stock_data(asset_name)
+        if not stock_data:
             return Response({"error": "Não foi possível obter dados do ativo."}, status=status.HTTP_400_BAD_REQUEST)
 
         # calcula os limites de compra e venda
-        limits = calculate_limits(None, yahoo_data)
+        limits = calculate_limits(None, stock_data)
         if limits is None:
             return Response({"error": "Variação insuficiente para calcular os limites."}, status=status.HTTP_400_BAD_REQUEST)
 
         return Response({
             "name": asset_name,
-            "current_price": yahoo_data['LTP'],
+            "current_price": stock_data['LTP'],
             "buy_limit": limits['buy_limit'],
             "sell_limit": limits['sell_limit'],
             "periodicity": periodicity
