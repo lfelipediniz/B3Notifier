@@ -8,7 +8,6 @@ body {
   color: hsl(var(--foreground));
   margin: 0;
   min-height: 100vh;
-  width: 100vw;
   display: flex;
   flex-direction: column;
 }

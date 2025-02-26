@@ -7,7 +7,7 @@ import StockCard from "@/components/StockCard";
 import FilterPopover from "@/components/FilterPopover";
 import AddStockModal from "@/components/AddStockModal";
 import EditStockModal from "@/components/EditStockModal";
-import { getStocks } from "@/api"; 
+import { getStocks, getStockUpdatesInfo } from "@/api"; 
 
 const Stocks = () => {
   const [filters, setFilters] = useState({
@@ -22,6 +22,11 @@ const Stocks = () => {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
 
+  // armazena informações de update nos ativos
+  const [updateInfo, setUpdateInfo] = useState({
+    last_update: null,
+  });
+  
   // checkboxes complementares
   const handleFilterChange = (filter) => {
     setFilters((prev) => {
@@ -44,6 +49,26 @@ const Stocks = () => {
     setIsEditStockModalOpen(true);
   };
 
+  // formata o tempo decorrido
+  const getTimeElapsed = (timestamp) => {
+    if (!timestamp) return "Desconhecido";
+    const diffInSeconds = Math.floor((new Date() - new Date(timestamp)) / 1000);
+    if (diffInSeconds < 60) return `${diffInSeconds} s`;
+    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} min`;
+    return `${Math.floor(diffInSeconds / 3600)} h`;
+  };
+
+  const fetchUpdateInfo = async () => {
+    try {
+      const data = await getStockUpdatesInfo();
+      setUpdateInfo({
+        last_update: data.last_update,
+      });
+    } catch (error) {
+      console.error("Erro ao buscar informações de atualização:", error);
+    }
+  };
+
   // busca os ativos monitorados do usuario 
   useEffect(() => {
     const fetchStocks = async () => {
@@ -58,6 +83,14 @@ const Stocks = () => {
     };
 
     fetchStocks();
+    fetchUpdateInfo();
+
+    // atualizaçao nas infos de tempo de update
+    const interval = setInterval(() => {
+      fetchUpdateInfo();
+    }, 60000); 
+
+    return () => clearInterval(interval);
   }, []);
 
   // filtra os stocks pelo nome
@@ -92,7 +125,8 @@ const Stocks = () => {
         <div className="hidden md:block">
           <div className="flex items-center gap-2">
             <Badge variant="outline" className="flex items-center gap-1">
-              <Clock size={16} /> Última Atualização há 3 min
+              <Clock size={16} />
+              Última Atualização: {updateInfo.last_update ? getTimeElapsed(updateInfo.last_update) : "Carregando..."}
             </Badge>
             <Button
               variant="default"
@@ -107,7 +141,8 @@ const Stocks = () => {
 
       <div className="flex items-center justify-between gap-2 md:hidden">
         <Badge variant="outline" className="flex items-center gap-1">
-          <Clock size={16} /> Última Atualização há 3 min
+          <Clock size={16} />
+          Última Atualização: {updateInfo.last_update ? getTimeElapsed(updateInfo.last_update) : "Carregando..."}
         </Badge>
         <Button
           variant="default"
@@ -127,7 +162,7 @@ const Stocks = () => {
             />
             <div className="relative w-full max-w-md">
               <Search
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                className="absolute text-[hsl(var(--lightgrey))]] -translate-y-1/2 left-3 top-1/2"
                 size={20}
               />
               <Input 

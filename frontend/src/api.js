@@ -19,22 +19,21 @@ const api = axios.create({
       }
     }]
   });
-  
-// intercepta as requisicoes para adicionar o token JWT
-api.interceptors.request.use((config) => {
+  // intercepta as requisicoes para adicionar o token JWT
+  api.interceptors.request.use((config) => {
     // lista de rotas que NÃO precisam de autenticação
     const publicRoutes = ["/user/send-otp/", "/user/verify-otp/", "/user/register/", "/token/"];
-  
     // se a URL da requisição estiver na lista de rotas públicas, remove o token
     if (!publicRoutes.some(route => config.url.includes(route))) {
-      const token = localStorage.getItem("access_token");
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-      }
+        const token = localStorage.getItem("access_token");
+        if (token) {
+            config.headers.Authorization = `Bearer ${token}`;
+        }
     }
+    // console.log("Requisição: ", config.url, config.headers.Authorization);
     return config;
-  });
-  
+});
+
 
 // salva os tokens no localStorage e no axios
 const storeTokens = (access, refresh) => {
@@ -122,5 +121,19 @@ export const deleteStock = async (id) => {
   return handleRequest(() => api.delete(`/stock/delete/${id}/`));
 };
 
+// captura info sobre a ultima e a proxima atualizcao dos ativos
+export const getStockUpdatesInfo = async () => {
+  return handleRequest(() => api.get("/stocks/updates-info/"));
+};
+
+// adiciona alerta no historico de alertas
+export const addAlert = async (data) => {
+  return handleRequest(() => api.post("/alert/create/", data));
+};
+
+// captura os alertas do usuario
+export const getAlerts = async () => {
+  return handleRequest(() => api.get("/alert/list/"));
+};
 
 export default api;

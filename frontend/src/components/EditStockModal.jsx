@@ -16,7 +16,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import StockCard from "./StockCard";
-import { updateStock, deleteStock } from "@/api";
+import { updateStock, deleteStock, addAlert } from "@/api"; 
 import {
   AlertDialog,
   AlertDialogAction,
@@ -28,6 +28,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { format, toZonedTime } from "date-fns-tz";
 
 const timeIntervals = [
   { label: "5 min", value: 5 },
@@ -57,6 +58,25 @@ const EditStockModal = ({ isOpen, onClose, stock, onStockUpdated }) => {
     try {
       const data = { periodicity: selectedTime };
       const response = await updateStock(stock.id, data);
+
+      // criando um alerta de ediçao
+      const now = new Date();
+      const timeZone = "America/Sao_Paulo";
+      const zonedDate = toZonedTime(now, timeZone);
+
+      const alert_date = format(zonedDate, "yyyy-MM-dd", { timeZone });
+      const alert_time = format(zonedDate, "HH:mm", { timeZone });
+      
+      const alertData = {
+        asset_name: stock.name, 
+        alert_type: "edition", 
+        alert_date,
+        alert_time,
+      };
+
+      await addAlert(alertData);
+      window.location.reload();
+      
       if (onStockUpdated) {
         onStockUpdated(response);
       }
@@ -76,6 +96,25 @@ const EditStockModal = ({ isOpen, onClose, stock, onStockUpdated }) => {
     setDeleting(true);
     try {
       await deleteStock(stock.id);
+      
+      // criando um alerta de remoçao
+      const now = new Date();
+      const timeZone = "America/Sao_Paulo";
+      const zonedDate = toZonedTime(now, timeZone);
+
+      const alert_date = format(zonedDate, "yyyy-MM-dd", { timeZone });
+      const alert_time = format(zonedDate, "HH:mm", { timeZone });
+      
+      const alertData = {
+        asset_name: stock.name, // agora o backend salva esse valor
+        alert_type: "removal",  // ou "edition", conforme o caso
+        alert_date,
+        alert_time,
+      };
+
+      await addAlert(alertData);
+      window.location.reload();
+      
       if (onStockUpdated) {
         onStockUpdated({ id: stock.id, deleted: true });
       }
@@ -101,12 +140,10 @@ const EditStockModal = ({ isOpen, onClose, stock, onStockUpdated }) => {
             </DialogTitle>
           </div>
           <DialogDescription className="text-sm text-[hsl(var(--muted-foreground))]">
-            Edite as configurações do ativo, redefina os limites e ajuste a
-            periodicidade.
+            Edite as configurações do ativo, redefina os limites e ajuste a periodicidade.
           </DialogDescription>
         </DialogHeader>
 
-         {/* seletor de tempo */}
         <div className="relative mt-4">
           <Select
             value={selectedTime}

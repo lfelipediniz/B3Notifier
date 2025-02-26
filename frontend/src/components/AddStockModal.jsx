@@ -9,7 +9,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Plus, Settings, Search, Clock } from "lucide-react";
 import { Input } from "./ui/input";
-
 import {
   Select,
   SelectContent,
@@ -18,8 +17,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import StockCard from "./StockCard";
-import { addStock, fetchStockQuote, getStocks } from "@/api";
-import EditStockModal from "./EditStockModal";
+import { addStock, fetchStockQuote, getStocks, addAlert } from "@/api";
+import { format, toZonedTime } from "date-fns-tz";
 
 const timeIntervals = [
   { label: "5 min", value: 5 },
@@ -36,9 +35,6 @@ const AddStockModal = ({ isOpen, onClose, onStockAdded }) => {
   const [loading, setLoading] = useState(false);
   const [fetchingQuote, setFetchingQuote] = useState(false);
   const [monitoredStocks, setMonitoredStocks] = useState([]);
-
-  // modal de edicao
-  const [isEditStockModalOpen, setIsEditStockModalOpen] = useState(false);
 
   // busca os ativos monitorados do usuário
   useEffect(() => {
@@ -85,11 +81,8 @@ const AddStockModal = ({ isOpen, onClose, onStockAdded }) => {
     );
 
   const handleAddStock = async () => {
-    if (!assetName.trim() || !stockData) {
-      return;
-    }
+    if (!assetName.trim() || !stockData) return;
     setLoading(true);
-
     const normalizedAssetName = getNormalizedAssetName(assetName);
     const data = {
       name: normalizedAssetName,
@@ -98,9 +91,26 @@ const AddStockModal = ({ isOpen, onClose, onStockAdded }) => {
 
     try {
       const response = await addStock(data);
-      if (onStockAdded) {
-        onStockAdded(response);
-      }
+      if (onStockAdded) onStockAdded(response);
+
+      // criando um alerta de adiçao
+      const now = new Date();
+      const timeZone = "America/Sao_Paulo";
+      const zonedDate = toZonedTime(now, timeZone);
+
+      const alert_date = format(zonedDate, "yyyy-MM-dd", { timeZone });
+      const alert_time = format(zonedDate, "HH:mm", { timeZone });
+      console.log(alert_date, alert_time);
+
+      const alertData = {
+        asset_name: normalizedAssetName,
+        alert_type: "addition",
+        alert_date,
+        alert_time,
+      };
+
+      await addAlert(alertData);
+      window.location.reload();
       onClose();
     } catch (error) {
       console.error(
@@ -110,10 +120,6 @@ const AddStockModal = ({ isOpen, onClose, onStockAdded }) => {
     } finally {
       setLoading(false);
     }
-  };
-
-  // salva o novo ativo e abre o modal de edição
-  const handleEditStock = () => {
   };
 
   return (
@@ -131,10 +137,10 @@ const AddStockModal = ({ isOpen, onClose, onStockAdded }) => {
           </DialogDescription>
         </DialogHeader>
 
-        <div className="flex items-center w-full  mb-4">
+        <div className="flex items-center w-full mb-4">
           <div className="relative flex-1">
             <Search
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+              className="absolute text-[hsl(var(--lightgrey))] -translate-y-1/2 left-3 top-1/2"
               size={20}
             />
             <Input
@@ -150,7 +156,10 @@ const AddStockModal = ({ isOpen, onClose, onStockAdded }) => {
             />
           </div>
 
-          <Button onClick={handleSearch} className="ml-2 bg-[hsl(var(--lightgrey))]">
+          <Button
+            onClick={handleSearch}
+            className="ml-2 bg-[hsl(var(--lightgrey))]"
+          >
             Pesquisar
           </Button>
         </div>
