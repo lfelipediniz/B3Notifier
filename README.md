@@ -144,4 +144,3 @@ VITE_API_BASE_URL=http://127.0.0.1:8000/api # or your cloud api key
 
 --- 
 **Happy Trading!** 🚀  
-Made with ❤️ by [@lfelipediniz](https://www.linkedin.com/in/lfelipediniz/)
